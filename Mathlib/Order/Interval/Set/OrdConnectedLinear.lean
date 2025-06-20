@@ -16,14 +16,14 @@ some convenience lemmas for characterising closed intervals in certain concrete 
 `ℕ`, and `Fin n`.
 
 ## Main results:
- * `Set.ordConnected_iff_disjoint_Ioo_empty`: a characterisation of `Set.OrdConnected` for
-   locally-finite linear orders.
- * `Set.Nonempty.ordConnected_iff_of_bdd`: a characterisation of closed intervals for locally-finite
-   conditionally complete linear orders.
- * `Set.Nonempty.ordConnected_iff_of_bdd'`: a characterisation of closed intervals for
-   locally-finite complete linear orders (convenient for `Fin n`).
- * `Set.Nonempty.eq_Icc_iff_nat`: characterisation of closed intervals for `ℕ`.
- * `Set.Nonempty.eq_Icc_iff_int`: characterisation of closed intervals for `ℤ`.
+* `Set.ordConnected_iff_disjoint_Ioo_empty`: a characterisation of `Set.OrdConnected` for
+  locally-finite linear orders.
+* `Set.Nonempty.ordConnected_iff_of_bdd`: a characterisation of closed intervals for locally-finite
+  conditionally complete linear orders.
+* `Set.Nonempty.ordConnected_iff_of_bdd'`: a characterisation of closed intervals for
+  locally-finite complete linear orders (convenient for `Fin n`).
+* `Set.Nonempty.eq_Icc_iff_nat`: characterisation of closed intervals for `ℕ`.
+* `Set.Nonempty.eq_Icc_iff_int`: characterisation of closed intervals for `ℤ`.
 -/
 
 variable {α : Type*} {I : Set α}
@@ -66,7 +66,7 @@ lemma Set.ordConnected_iff_disjoint_Ioo_empty [LinearOrder α] [LocallyFiniteOrd
     have h₄ : Ico z y' ⊆ Iᶜ := fun t ht ht' ↦ hy''.not_lt (⟨ht', ht.1, le_trans ht.2.le hy'⟩) ht.2
     have h₅ : Ioo x' y' ⊆ Iᶜ := by
       simp only [← Ioc_union_Ico_eq_Ioo hxz hzy, union_subset_iff, and_true, h₃, h₄]
-    exact eq_empty_iff_forall_not_mem.1 (h' x' hx''.prop.1 y' hy''.prop.1 h₅) z ⟨hxz, hzy⟩
+    exact eq_empty_iff_forall_notMem.1 (h' x' hx''.prop.1 y' hy''.prop.1 h₅) z ⟨hxz, hzy⟩
 
 lemma Set.Nonempty.eq_Icc_iff_nat {I : Set ℕ}
     (h₀ : I.Nonempty) (h₂ : BddAbove I) :
