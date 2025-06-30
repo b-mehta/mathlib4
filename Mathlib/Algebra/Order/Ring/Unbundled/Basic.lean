@@ -395,7 +395,7 @@ lemma mul_add_mul_lt_mul_add_mul [ExistsAddOfLE R] [MulPosStrictMono R]
   rw [mul_add, add_right_comm, mul_add, ← add_assoc]
   exact add_lt_add_left (mul_lt_mul_of_pos_right hab hd) _
 
-/-- Binary **rearrangement inequality**. -/
+/-- Binary strict **rearrangement inequality**. -/
 lemma mul_add_mul_lt_mul_add_mul' [ExistsAddOfLE R] [MulPosStrictMono R]
     [AddLeftStrictMono R]
     (hba : b < a) (hdc : d < c) : a * d + b * c < a * c + b * d := by
