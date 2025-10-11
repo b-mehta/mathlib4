@@ -38,13 +38,13 @@ lemma pratt_rule_2 (a : ℕ) {p : ℕ} (hp : p ≠ 0) (h : pratt_predicate p a (
   · simp at h'
   rw [pratt_predicate, succ_sub_one] at h
   rw [succ_sub_one] at h'
-  simp only [mem_primeFactors_of_ne_zero (succ_ne_zero _), and_assoc, ne_eq, and_imp] at h
+  simp only [mem_primeFactors_of_ne_zero (succ_ne_zero _), ne_eq, and_imp] at h
   let a' : ZMod (p + 2) := a
   have := lucas_primality _ a'
   simp only [a', ← Nat.cast_pow] at this
   refine this ?_ (fun q hq hq' ↦ ?_)
   · rw [← ZMod.natCast_mod, succ_sub_one, h', Nat.cast_one]
-  rw [← ZMod.natCast_mod, ←@Nat.cast_one (ZMod (p+2)), ne_eq, ZMod.eq_iff_modEq_nat,
+  rw [← ZMod.natCast_mod, ←@Nat.cast_one (ZMod (p+2)), ne_eq, ZMod.natCast_eq_natCast_iff,
     Nat.ModEq, mod_mod, one_mod]
   simp only [powMod] at h
   exact h _ hq hq'

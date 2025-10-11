@@ -64,32 +64,6 @@ def powModTR (a b n : ℕ) : ℕ :=
       else
         aux (a * a % n) (b / 2) (a * c % n) fuel (by omega)
 
-set_option allowUnsafeReducibility true
-
-@[semireducible]
-partial def aux (n a b c : ℕ) : ℕ :=
-    if b = 0 then c % n
-    else if b = 1 then (a * c) % n
-    else if b % 2 = 0 then
-      aux n (a * a % n) (b / 2) c
-    else
-      aux n (a * a % n) (b / 2) (a * c % n)
-
-def powModTR' (a b n : ℕ) : ℕ :=
-  let rec @[semireducible] aux (a b c : ℕ) : ℕ :=
-    if b = 0 then c % n
-    else if b = 1 then (a * c) % n
-    else if b % 2 = 0 then
-      aux (a * a % n) (b / 2) c
-    else
-      aux (a * a % n) (b / 2) (a * c % n)
-    partial_fixpoint
-  aux (a % n) b 1
-
--- #print powModTR'.aux
-
--- #exit
-
 lemma powModTR_aux_congr (n a b c fuel1 fuel2) (hfuel1 : b < fuel1) (hfuel2 : b < fuel2) :
     powModTR.aux n a b c fuel1 hfuel1 = powModTR.aux n a b c fuel2 hfuel2 :=
   match fuel1, fuel2 with
@@ -183,7 +157,7 @@ def provePowModEq (a b n m : ℕ) (aE bE nE : Expr) : MetaM Expr := do
 def provePowModNe (a b n m : ℕ) (aE bE nE mE : Expr) : MetaM Expr := do
   let (m', m'E, eq) ← mkPowModEq a b n aE bE nE
   if m = m' then throwError "attempted to prove {a} ^ {b} % {n} ≠ {m} but it is {m'}"
-  let ne := reflBoolTrue
+  let ne := eagerReflBoolTrue
   return mkApp7 (mkConst ``powMod_ne []) aE bE nE mE m'E ne eq
 
 def extract_numerals (lhsE : Expr) : MetaM (ℕ × ℕ × ℕ) := do
@@ -221,9 +195,9 @@ elab "prove_pow_mod" : tactic =>
 
 end Tactic.powMod
 
+set_option linter.style.nativeDecide false in
 macro "prove_pow_mod2" : tactic => `(tactic| {rw [← powModTR_eq]; decide +native})
 
-#time
 example :
     powMod 2
       2112421871326486211461011031931945323874719289347729538762174157135451276986
@@ -231,15 +205,12 @@ example :
       1 := by
   prove_pow_mod
 
-#time
 example :
     powMod 2
       2112421871326486211461011031931945323874719289347729538762174157135451276986
       2112421871326486211461011031931945323874719289347729538762174157135451276987 =
       1 := by
   prove_pow_mod2
-
-#exit
 
 example : powMod 2304821 1 2308 = 1437 := by
   prove_pow_mod

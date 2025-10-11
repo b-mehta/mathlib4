@@ -5,7 +5,7 @@ Authors: Bhavik Mehta
 -/
 import Mathlib.V2.PrattLemmas
 import Batteries.Tactic.NoMatch
-import Mathlib.Lean.Message
+import Lean.Message
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.V2.PowMod
 
@@ -167,7 +167,7 @@ def extractFactor.acc (p q i : ℕ) (hq : 1 < q) : ℕ × ℕ :=
 Given `p q : ℕ`, find the unique `r k : ℕ` such that `r * q ^ k = p` and `r` is not divisible by `q`
 -/
 def extractFactor (p q : ℕ) : ℕ × ℕ :=
-  if hq : q ≤ 1 then (p, 0) else extractFactor.acc p q 0 (lt_of_not_le hq)
+  if hq : q ≤ 1 then (p, 0) else extractFactor.acc p q 0 (lt_of_not_ge hq)
 
 structure PrattProofEntry : Type where
   metaVar : Expr
