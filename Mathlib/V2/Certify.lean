@@ -9,6 +9,8 @@ import Lean.Message
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.V2.PowMod
 
+-- TODO: adapt to use pow_mod_2 stuff
+
 open Nat
 
 namespace Tactic.Prime

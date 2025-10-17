@@ -51,55 +51,93 @@ lemma powMod_ne {a b n m : ℕ} (m' : ℕ) (hm : bne m' m) (h : powMod a b n = m
     powMod a b n ≠ m := by
   simp_all
 
-def powModTR (a b n : ℕ) : ℕ :=
-  aux (a % n) b 1 (b + 1) (by omega) where
-  aux (a b c : ℕ) (fuel : ℕ) (hfuel : b < fuel) : ℕ :=
-    match fuel with
-    | 0 => by omega
-    | fuel + 1 =>
-      if hb : b = 0 then c % n
-      else if b = 1 then (a * c) % n
-      else if b % 2 = 0 then
-        aux (a * a % n) (b / 2) c fuel (by omega)
-      else
-        aux (a * a % n) (b / 2) (a * c % n) fuel (by omega)
+noncomputable def powModTR (a b n : Nat) : Nat :=
+  aux b.succ (a.mod n) b 1
+where
+  aux : Nat → ((a b c : Nat) → Nat) :=
+    Nat.rec (fun _ _ _ => 0)
+      (fun _ r a b c =>
+        (b.beq 0).rec
+          ((b.beq 1).rec
+            (((b.mod 2).beq 0).rec
+                (r ((a.mul a).mod n) (b.div 2) ((a.mul c).mod n))
+                (r ((a.mul a).mod n) (b.div 2) c))
+            ((a.mul c).mod n))
+          (c.mod n))
 
-lemma powModTR_aux_congr (n a b c fuel1 fuel2) (hfuel1 : b < fuel1) (hfuel2 : b < fuel2) :
-    powModTR.aux n a b c fuel1 hfuel1 = powModTR.aux n a b c fuel2 hfuel2 :=
-  match fuel1, fuel2 with
-  | 0, _ => by omega
-  | _, 0 => by omega
-  | fuel1 + 1, fuel2 + 1 => by
-    simp only [powModTR.aux]
-    split
-    · simp
-    split
-    · simp
-    split
-    · rw [powModTR_aux_congr]
-    · rw [powModTR_aux_congr]
+def powModTR' (a b n : ℕ) : ℕ :=
+  aux (a % n) b 1
+  where aux (a b c : ℕ) : ℕ :=
+    if b = 0 then c % n
+    else if b = 1 then (a * c) % n
+    else if b % 2 = 0 then
+      aux (a * a % n) (b / 2) c
+    else
+      aux (a * a % n) (b / 2) (a * c % n)
+    partial_fixpoint
+
+lemma Bool.rec_eq_ite {α : Type*} {b : Bool} {t f : α} : b.rec f t = if b then t else f := by
+  cases b <;> simp
+
+@[simp] lemma Nat.mod_eq_mod {a b : ℕ} : a.mod b = a % b := rfl
+@[simp] lemma Nat.div_eq_div {a b : ℕ} : a.div b = a / b := rfl
+@[simp] lemma Nat.land_eq_land {a b : ℕ} : a.land b = a &&& b := rfl
+
+@[simp] lemma powModTR_aux_zero_eq {n a b c : ℕ} :
+    powModTR.aux n 0 a b c = 0 := rfl
+
+lemma powModTR_aux_succ_eq {n a b c fuel : ℕ} :
+    powModTR.aux n (fuel + 1) a b c =
+      (b.beq 0).rec (true := c % n)
+      ((b.beq 1).rec (true := (a * c) % n)
+      (((b % 2).beq 0).rec
+          (powModTR.aux n fuel (a * a % n) (b / 2) (a * c % n))
+          (powModTR.aux n fuel (a * a % n) (b / 2) c))) := by
+  rfl
+
+lemma powModTR_aux_succ_eq' {n a b c fuel : ℕ} :
+    powModTR.aux n (fuel + 1) a b c =
+      if b = 0 then c % n else
+      if b = 1 then a * c % n else
+      if b % 2 = 0 then powModTR.aux n fuel (a * a % n) (b / 2) c
+      else powModTR.aux n fuel (a * a % n) (b / 2) (a * c % n) := by
+  simp only [powModTR_aux_succ_eq, Bool.rec_eq_ite, beq_eq]
 
 lemma powModTR_aux_eq (n a b c fuel) (hfuel : b < fuel) :
-    powModTR.aux n a b c fuel hfuel = powModAux a b c n := by
-  induction a, b, c, fuel, hfuel using powModTR.aux.induct n with
-  | case1 a b c hfuel => omega
-  | case2 a c fuel hfuel =>
-    rw [powModTR.aux, dif_pos rfl]
-    exact (powModAux_zero_eq rfl).symm
-  | case3 a c fuel hfuel h =>
-    rw [powModTR.aux, dif_neg h, if_pos rfl]
-    exact (powModAux_one_eq rfl).symm
-  | case4 a b c fuel hfuel h₁ h₂ h₃ ih1 =>
-    rw [powModTR.aux, dif_neg h₁, if_neg h₂, if_pos h₃, ih1]
-    exact (powModAux_even_eq rfl (by omega) rfl).symm
-  | case5 a b c fuel hfuel h₁ h₂ h₃ ih1 =>
-    rw [powModTR.aux, dif_neg h₁, if_neg h₂, if_neg h₃, ih1]
-    exact (powModAux_odd_eq (by omega) rfl rfl rfl).symm
+    powModTR.aux n fuel a b c = powModAux a b c n := by
+  induction fuel generalizing a b c with
+  | zero => omega
+  | succ fuel ih =>
+    rw [powModTR_aux_succ_eq']
+    split
+    case isTrue hb0 => rw [hb0, powModAux, pow_zero, one_mul]
+    split
+    case isTrue hb1 => rw [hb1, powModAux, pow_one]
+    split
+    case isTrue hb0 hbe =>
+      rw [ih _ _ _ (by omega)]
+      rw [powModAux, powModAux, Nat.mul_mod _ c, Nat.mul_mod _ c]
+      conv_rhs =>
+        rw [← Nat.mod_add_div b 2]
+      rw [hbe, zero_add, pow_mul, ← pow_two, ← Nat.pow_mod]
+    case isFalse hb0 hbo =>
+      rw [ih _ _ _ (by omega)]
+      rw [powModAux, powModAux, Nat.mul_mod, Nat.mod_mod, ← pow_two,
+        ← Nat.pow_mod, ← Nat.pow_mul, ← Nat.mul_mod, ← mul_assoc, ← Nat.pow_add_one]
+      congr! 3
+      cutsat
 
-lemma powModTR_eq (a b n) :
-    powModTR a b n = powMod a b n := by
-  apply (powMod_eq _ _ rfl).symm
-  rw [powModTR, powModTR_aux_eq]
+lemma powModTR_eq (a b n : ℕ) : powModTR a b n = powMod a b n := by
+  rw [powModTR, powModTR_aux_eq _ _ _ _ _ (by omega)]
+  rw [powModAux, mul_one, powMod, mod_eq_mod, ← Nat.pow_mod]
+
+lemma powMod_eq_of_powModTR (a b n m : ℕ) (h : (powModTR a b n).beq m) : powMod a b n = m := by
+  rwa [powModTR_eq, beq_eq] at h
+
+lemma powMod_ne_of_powModTR (a b n m : ℕ) (h : (powModTR a b n).beq m = false) :
+    powMod a b n ≠ m := by
+  have := Nat.ne_of_beq_eq_false h
+  rwa [powModTR_eq] at this
 
 namespace Tactic.powMod
 
@@ -160,14 +198,26 @@ def provePowModNe (a b n m : ℕ) (aE bE nE mE : Expr) : MetaM Expr := do
   let ne := eagerReflBoolTrue
   return mkApp7 (mkConst ``powMod_ne []) aE bE nE mE m'E ne eq
 
-def extract_numerals (lhsE : Expr) : MetaM (ℕ × ℕ × ℕ) := do
-  let some (aE, bE, nE) := lhsE.app3? ``powMod | throwError "lhs is not a pow-mod"
-  let some a := aE.nat? | throwError "base is not a numeral"
-  let some b := bE.nat? | throwError "exponent is not a numeral"
-  let some n := nE.nat? | throwError "modulus is not a numeral"
-  return (a, b, n)
+/-- Given `a, b, n : ℕ`, return `(m, ⊢ powMod a b n = m)`. -/
+def mkPowModEq' (a b n : ℕ) (aE bE nE : Expr) : MetaM (ℕ × Expr × Expr) := do
+  let m := powModTR' a b n
+  let mE := mkNatLit m
+  return (m, mE, mkApp5 (mkConst ``powMod_eq_of_powModTR) aE bE nE mE eagerReflBoolTrue)
 
-def prove_pow_mod_tac (g : MVarId) : MetaM Unit := do
+/-- Given `a, b, n, m : ℕ`, if `powMod a b n = m` then return a proof of that fact. -/
+def provePowModEq' (a b n m : ℕ) (aE bE nE : Expr) : MetaM Expr := do
+  let (m', _, eq) ← mkPowModEq' a b n aE bE nE
+  unless m = m' do throwError "attempted to prove {a} ^ {b} % {n} = {m} but it's actually {m'}"
+  return eq
+
+/-- Given `a, b, n, m : ℕ`, if `powMod a b n ≠ m` then return a proof of that fact. -/
+def provePowModNe' (a b n m : ℕ) (aE bE nE mE : Expr) : MetaM Expr := do
+  let m' := powModTR' a b n
+  if m = m' then throwError "attempted to prove {a} ^ {b} % {n} ≠ {m} but it is {m'}"
+  return mkApp5 (mkConst ``powMod_ne_of_powModTR) aE bE nE mE eagerReflBoolFalse
+
+def prove_pow_mod_tac_aux (eq ne : ℕ → ℕ → ℕ → ℕ → Expr → Expr → Expr → Expr → MetaM Expr)
+    (g : MVarId) : MetaM Unit := do
   let t : Expr ← g.getType
   match_expr t with
   | Eq ty lhsE rhsE =>
@@ -177,7 +227,7 @@ def prove_pow_mod_tac (g : MVarId) : MetaM Unit := do
     let some a := aE.nat? | throwError "base is not a numeral"
     let some b := bE.nat? | throwError "exponent is not a numeral"
     let some n := nE.nat? | throwError "modulus is not a numeral"
-    let pf ← provePowModEq a b n rhs aE bE nE
+    let pf ← eq a b n rhs aE bE nE rhsE
     g.assign pf
   | Ne ty lhsE rhsE =>
     unless (← whnfR ty).isConstOf ``Nat do throwError "not an equality of naturals"
@@ -186,17 +236,24 @@ def prove_pow_mod_tac (g : MVarId) : MetaM Unit := do
     let some a := aE.nat? | throwError "base is not a numeral"
     let some b := bE.nat? | throwError "exponent is not a numeral"
     let some n := nE.nat? | throwError "modulus is not a numeral"
-    let pf ← provePowModNe a b n rhs aE bE nE rhsE
+    let pf ← ne a b n rhs aE bE nE rhsE
     g.assign pf
   | _ => throwError "not an accepted expression"
 
-elab "prove_pow_mod" : tactic =>
-  liftMetaFinishingTactic prove_pow_mod_tac
+def prove_pow_mod_tac (g : MVarId) : MetaM Unit :=
+  prove_pow_mod_tac_aux
+    (fun a b n m aE bE nE _ ↦ provePowModEq a b n m aE bE nE)
+    provePowModNe g
+
+def prove_pow_mod_tac2 (g : MVarId) : MetaM Unit :=
+  prove_pow_mod_tac_aux
+    (fun a b n m aE bE nE _ ↦ provePowModEq' a b n m aE bE nE)
+    provePowModNe' g
+
+elab "prove_pow_mod" : tactic => liftMetaFinishingTactic prove_pow_mod_tac
+elab "prove_pow_mod2" : tactic => liftMetaFinishingTactic prove_pow_mod_tac2
 
 end Tactic.powMod
-
-set_option linter.style.nativeDecide false in
-macro "prove_pow_mod2" : tactic => `(tactic| {rw [← powModTR_eq]; decide +native})
 
 example :
     powMod 2
