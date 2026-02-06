@@ -10,6 +10,10 @@ import Mathlib.Analysis.Normed.Operator.Banach
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.LinearAlgebra.Eigenspace.Basic
+import Mathlib.Analysis.InnerProductSpace.Spectrum
+import Mathlib.Analysis.CStarAlgebra.ContinuousFunctionalCalculus.Instances
+import Mathlib.Analysis.CStarAlgebra.ContinuousFunctionalCalculus.Order
+
 
 /-!
 # Spectral theory of compact operators
@@ -113,16 +117,19 @@ theorem riesz_lemma_one
   rwa [← le_inv_mul_iff₀' (by simpa), ← h₂, smul_sub, inv_smul_smul₀] at h₁
   simpa using hx₀'
 
--- theorem riesz_lemma_of_norm_lt {c : 𝕜} (hc : 1 < ‖c‖) {R : ℝ} (hR : ‖c‖ < R) {F : Subspace 𝕜 E}
---     (hFc : IsClosed (F : Set E)) (hF : ∃ x : E, x ∉ F) :
---     ∃ x₀ : E, ‖x₀‖ ≤ R ∧ ∀ y ∈ F, 1 ≤ ‖x₀ - y‖ := by
-
+/--
+Given an endomorphism `S` of a normed space that's a closed embedding but not surjective, we can
+find a sequence of unit vectors `f n`, such that `f n` is in the range of `S ^ n` but is at least
+`1/2` away from any vector in the range of `S ^ (n + 1)`.
+-/
 theorem thing {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
-    {S : X →L[𝕜] X}
+    {S : End 𝕜 X}
     (hS_not_surj : ¬ (S : X → X).Surjective)
-    (hS_inj : (S : X → X).Injective)
-    (hT_anti : Topology.IsClosedEmbedding S) :
-    ∃ f : ℕ → X, (∀ n, ‖f n‖ = 1) ∧ Pairwise (2⁻¹ ≤ ‖f · - f ·‖) := by
+    (hS_anti : Topology.IsClosedEmbedding S)
+    {r : ℝ} (hr : r < 1) :
+    ∃ f : ℕ → X,
+      (∀ n, ‖f n‖ = 1) ∧ (∀ n, f n ∈ (S ^ n).range) ∧
+      (∀ n, ∀ y ∈ (S ^ (n + 1)).range, r ≤ ‖f n - y‖) := by
   obtain ⟨x, hx⟩ : ∃ x : X, ∀ y, S y ≠ x := by simpa [Function.Surjective] using hS_not_surj
   let V (n : ℕ) : Submodule 𝕜 X := S.iterateRange n
   have hV_succ (n : ℕ) : V (n + 1) = (V n).map (S : End 𝕜 X) := LinearMap.iterateRange_succ
@@ -131,30 +138,23 @@ theorem thing {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace
     | zero => simp [V, Module.End.one_eq_id]
     | succ n ih =>
       rw [hV_succ]
-      apply hT_anti.isClosedMap _ ih
-  have x (n : ℕ) : ∃ x ∈ V n, ‖x‖ = 1 ∧ ∀ y ∈ V (n + 1), 2⁻¹ ≤ ‖x - y‖ := by
+      apply hS_anti.isClosedMap _ ih
+  have x (n : ℕ) : ∃ x ∈ V n, ‖x‖ = 1 ∧ ∀ y ∈ V (n + 1), r ≤ ‖x - y‖ := by
     have h₁ : IsClosed (Submodule.comap (V n).subtype (V (n + 1)) : Set (V n)) := by
       simpa using (hV_closed (n + 1)).preimage_val
     have h₂ : ∃ x : V n, x ∉ (V (n + 1)).comap (V n).subtype := by
-      suffices ∃ a, ∀ y, S y ≠ a by simpa [iterate_succ, V, (iterate_injective hS_inj n).eq_iff]
-      use x
-    obtain ⟨⟨x, hx⟩, hx', hxn, hxy⟩ := riesz_lemma_one h₁ h₂ (show 2⁻¹ < 1 by norm_num)
+      simpa [iterate_succ, V, (iterate_injective hS_anti.injective n).eq_iff] using by use x
+    obtain ⟨⟨x, hx⟩, hx', hxn, hxy⟩ := riesz_lemma_one h₁ h₂ hr
     simp only [Submodule.mem_comap, Submodule.subtype_apply, AddSubgroupClass.coe_norm,
       AddSubgroupClass.coe_sub, Subtype.forall] at hx' hxn hxy
     exact ⟨x, hx, hxn, fun y hy ↦ hxy y (S.iterateRange.monotone (by simp) hy) hy⟩
   choose x hxv hxn hxy using x
-  refine ⟨x, hxn, ?_⟩
-  intro m n hmn
-  wlog! hmn' : m < n generalizing m n
-  · rw [norm_sub_rev]
-    exact this hmn.symm (by order)
-  exact hxy m (x n) (S.iterateRange.monotone hmn' (hxv n))
+  exact ⟨x, hxn, hxv, hxy⟩
 
 /-- The Fredholm alternative for compact operators: if `T` is a compact operator and `μ ≠ 0`,
 then either `μ` is an eigenvalue of `T`, or `μ` is in the resolvent set of `T`. -/
 theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
-    {μ : 𝕜} (hμ : μ ≠ 0) :
-    HasEigenvalue (T : End 𝕜 X) μ ∨ μ ∈ resolventSet 𝕜 T := by
+    {μ : 𝕜} (hμ : μ ≠ 0) : HasEigenvalue (T : End 𝕜 X) μ ∨ μ ∈ resolventSet 𝕜 T := by
   by_contra!
   obtain ⟨h₁, h₂⟩ := this
   let (eq := hS) S := (T - μ • 1)
@@ -165,21 +165,85 @@ theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
     ext x
     simp [S]
   obtain ⟨K, -, hK : AntilipschitzWith K S⟩ := antilipschitz_of_not_hasEigenvalue hT hμ h₁
-  obtain ⟨f, hf_norm, hf_pair⟩ := thing (mt (.intro hK.injective) h₂) hK.injective
-    (hK.isClosedEmbedding S.uniformContinuous)
-  have : Pairwise fun x₁ x₂ ↦ 2⁻¹ * K ≤ ‖T (f x₁) - T (f x₂)‖ := by
+  obtain ⟨f, hf_norm, hf_mem, hf_far⟩ := thing (mt (.intro hK.injective) h₂)
+    (hK.isClosedEmbedding S.uniformContinuous) (show 2⁻¹ < 1 by norm_num)
+  have hf_mem' (n : ℕ) : S (f n) ∈ ((S : End 𝕜 X) ^ (n + 1)).range := by
+    rw [iterate_succ']
+    rw [LinearMap.range_comp]
+    exact ⟨f n, hf_mem n, rfl⟩
+  have hp : Pairwise fun x₁ x₂ ↦ 2⁻¹ * ‖μ‖ ≤ ‖T (f x₁) - T (f x₂)‖ := by
     intro m n hmn
-    have := hK.le_mul_dist (f m) (f n)
-    simp [dist_eq_norm_sub] at this
+    wlog! hmn' : m < n generalizing m n
+    · rw [norm_sub_rev]
+      exact this hmn.symm (by order)
+    let u : X := μ⁻¹ • (S (f n) - S (f m) + μ • f n)
+    have hu : μ • (f m - u) = (T (f m) - T (f n)) := by
+      rw [smul_sub, smul_inv_smul₀ hμ]
+      simp [S]
+      linear_combination (norm := module)
+    have : u ∈ ((S : End 𝕜 X) ^ (m + 1)).range := by
+      apply Submodule.smul_mem _ _ (Submodule.add_mem _ _ _)
+      · exact Submodule.sub_mem _ ((S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem' _))
+          (hf_mem' _)
+      · exact Submodule.smul_mem _ μ ((S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem n))
+    rw [← hu, norm_smul, mul_comm]
+    grw [hf_far _ u this]
+  obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact 1
+  obtain ⟨y, hyK, ψ, hψ, hψy⟩ := hK.tendsto_subseq (fun n ↦ hK' ⟨f n, by simp [*], rfl⟩)
+  replace hψy := hψy.cauchySeq
+  rw [Metric.cauchySeq_iff'] at hψy
+  obtain ⟨N, hN⟩ := hψy (2⁻¹ * ‖μ‖) (by positivity)
+  simp only [dist_eq_norm_sub, ContinuousLinearMap.coe_coe, Function.comp_apply] at hN
+  have := hN (N + 1) (by simp)
+  refine this.not_ge ?_
+  apply hp
+  simp [hψ.injective.eq_iff]
+
+def ContinuousLinearMap.toLinearMapAlgHom
+    {R₁ : Type*} [CommSemiring R₁] {M₁ : Type*}
+    [TopologicalSpace M₁] [CommRing M₁] [Algebra R₁ M₁] [IsScalarTower R₁ R₁ M₁]
+    [ContinuousAdd M₁] [ContinuousConstSMul R₁ M₁] [IsTopologicalAddGroup M₁] :
+    (M₁ →L[R₁] M₁) →ₐ[R₁] M₁ →ₗ[R₁] M₁ where
+  toRingHom := ContinuousLinearMap.toLinearMapRingHom
+  commutes' r := by
+    ext x
+    simp
+
+theorem ContinuousLinearMap.isUnit_toLinearMap_iff {𝕜 X : Type*} [NontriviallyNormedField 𝕜]
+    [NormedAddCommGroup X] [NormedSpace 𝕜 X] [CompleteSpace X] {T : X →L[𝕜] X} :
+    IsUnit T ↔ IsUnit (T : End 𝕜 X) := by
+  rw [ContinuousLinearMap.isUnit_iff_bijective, Module.End.isUnit_iff]
+  rfl
+
+theorem ContinuousLinearMap.spectrum_eq [CompleteSpace X] :
+    spectrum 𝕜 (T : X →L[𝕜] X) = spectrum 𝕜 (T : End 𝕜 X) := by
+  ext μ
+  rw [spectrum, resolventSet, Set.mem_compl_iff, Set.mem_setOf,
+    ContinuousLinearMap.isUnit_toLinearMap_iff]
+  rfl
+
+theorem hasEigenvalue_iff_mem_spectrum [CompleteSpace X] (hT : IsCompactOperator T)
+    {μ : 𝕜} (hμ : μ ≠ 0) :
+    HasEigenvalue (T : End 𝕜 X) μ ↔ μ ∈ spectrum 𝕜 T := by
+  constructor
+  · intro hμ'
+    rw [ContinuousLinearMap.spectrum_eq]
+    exact hμ'.mem_spectrum
+  · intro h
+    exact (fredholm_alternative hT hμ).resolve_right h
+
+theorem IsCompactOperator.forall_eigenspace_ne_bot_iff_eq_zero
+    {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [InnerProductSpace 𝕜 X] [CompleteSpace X]
+    {T : X →L[𝕜] X}
+    (hT : IsCompactOperator T)
+    (hT' : (T : End 𝕜 X).IsSymmetric) :
+    (∀ μ, HasEigenvalue (T : End 𝕜 X) μ → μ = 0) ↔ T = 0 := by
+  constructor
+  · intro h
+    rw [← ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric] at hT'
+    have := CStarAlgebra.norm_or_neg_norm_mem_spectrum
     sorry
-  sorry
-
-
-  -- have S_inj : (S : X → X).Injective := by
-  --   rw [hasEigenvalue_iff, eigenspace_def, not_not, LinearMap.ker_eq_bot] at h₁
-  --   exact h₁
-  -- let V (n : ℕ) : Submodule ℂ X := (S ^ n).range
-
-  -- sorry
-
--- #min_imports
+  · rintro rfl μ h
+    obtain ⟨v, hv⟩ := h.exists_hasEigenvector
+    simp [hasEigenvector_iff] at hv
+    grind [smul_eq_zero]
