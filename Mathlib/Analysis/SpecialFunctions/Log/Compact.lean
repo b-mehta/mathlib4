@@ -117,6 +117,8 @@ theorem riesz_lemma_one
   rwa [← le_inv_mul_iff₀' (by simpa), ← h₂, smul_sub, inv_smul_smul₀] at h₁
   simpa using hx₀'
 
+#find_home! riesz_lemma_one
+
 /--
 Given an endomorphism `S` of a normed space that's a closed embedding but not surjective, we can
 find a sequence of unit vectors `f n`, such that `f n` is in the range of `S ^ n` but is at least
@@ -241,7 +243,7 @@ theorem IsCompactOperator.forall_eigenspace_ne_bot_iff_eq_zero
   constructor
   · intro h
     rw [← ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric] at hT'
-    have := CStarAlgebra.norm_or_neg_norm_mem_spectrum
+    -- have := CStarAlgebra.norm_or_neg_norm_mem_spectrum (a := (T : End 𝕜 X))
     sorry
   · rintro rfl μ h
     obtain ⟨v, hv⟩ := h.exists_hasEigenvector
