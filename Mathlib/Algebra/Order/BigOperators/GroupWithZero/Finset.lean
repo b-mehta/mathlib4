@@ -87,4 +87,9 @@ lemma prod_lt_prod_of_nonempty (hf : ∀ i ∈ s, 0 < f i) (hfg : ∀ i ∈ s, f
 end PosMulStrictMono
 end CommMonoidWithZero
 
+@[simp, norm_cast]
+theorem PNat.coe_prod {ι : Type*} (f : ι → ℕ+) (s : Finset ι) :
+    ↑(∏ i ∈ s, f i) = (∏ i ∈ s, f i : ℕ) :=
+  map_prod PNat.coeMonoidHom _ _
+
 end Finset

@@ -90,11 +90,6 @@ lemma abs_prod [CommRing R] [LinearOrder R] [IsStrictOrderedRing R] (s : Finset 
     |∏ x ∈ s, f x| = ∏ x ∈ s, |f x| :=
   map_prod absHom _ _
 
-@[simp, norm_cast]
-theorem PNat.coe_prod {ι : Type*} (f : ι → ℕ+) (s : Finset ι) :
-    ↑(∏ i ∈ s, f i) = (∏ i ∈ s, f i : ℕ) :=
-  map_prod PNat.coeMonoidHom _ _
-
 section CanonicallyOrderedAdd
 variable [CommSemiring R] [PartialOrder R] [CanonicallyOrderedAdd R]
   {f g h : ι → R} {s : Finset ι} {i : ι}
