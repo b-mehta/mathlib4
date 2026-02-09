@@ -48,33 +48,54 @@ lemma ContinuousLinearMap.antilipschitz_of_bound_of_norm_one {X Y : Type*}
 
 open Filter Topology in
 /-- If `T : X →L[𝕜] X` is a compact operator on a Banach space `X`, and `μ ≠ 0` is not an
-eigenvalue of `T`, then `T - μ • 1` is antilipschitz.
+eigenvalue of `T`, then `T - μ • 1` is antilipschitz with positive constant.
+That is, `T - μ • 1` is bounded below as an operator.
 
 This is a useful step in the proof of the Fredholm alternative. -/
-theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
+theorem antilipschitz_of_not_hasEigenvalue {𝕜 X : Type*} [NontriviallyNormedField 𝕜]
+    [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+    {T : X →L[𝕜] X} (hT : IsCompactOperator T)
     {μ : 𝕜} (hμ : μ ≠ 0) (h : ¬ HasEigenvalue (T : End 𝕜 X) μ) :
     ∃ K > 0, AntilipschitzWith K (T - μ • 1 : X →L[𝕜] X) := by
-  suffices ∃ c > 0, ∀ x, ‖x‖ = 1 → c ≤ ‖(T - μ • 1) x‖ by
-    obtain ⟨c, hc', hc⟩ := this
-    refine ⟨c.toNNReal⁻¹, by positivity, ?_⟩
-    apply ContinuousLinearMap.antilipschitz_of_bound_of_norm_one
-    simpa [NNReal.coe_inv, le_inv_mul_iff₀', hc'] using hc
-  -- Suppose not, then we can find a sequence of unit vectors xₙ such that (T - μ • 1) xₙ → 0.
-  by_contra!
+  -- Suppose not, then for every K > 0, there is some x such that ‖(T - μ • 1) x‖ < K * ‖x‖.
+  by_contra! hK
+  replace hK : ∀ K > 0, ∃ x, ‖(T - μ • 1) x‖ < K * ‖x‖ := by
+    contrapose! hK
+    obtain ⟨K, hK₀, hK⟩ := hK
+    refine ⟨K.toNNReal⁻¹, by positivity, ?_⟩
+    apply AddMonoidHomClass.antilipschitz_of_bound
+    simpa [NNReal.coe_inv, le_inv_mul_iff₀, hK₀, hK₀.le] using hK
+  -- In fact, there is a lower bound `c` such that for every ε > 0, there is an `x` with norm
+  -- in the interval `[c, 1]` such that `‖(T - μ • 1) x‖ < ε`.
+  -- (In the case of an RCLike field, where we can rescale, we could even get `‖x‖ = 1`, but we
+  -- don't need that.)
+  replace hK : ∃ c > 0, ∀ ε > 0, ∃ x, ‖x‖ ≤ 1 ∧ c ≤ ‖x‖ ∧ ‖(T - μ • 1) x‖ < ε := by
+    obtain ⟨C, hC⟩ := NormedField.exists_one_lt_norm 𝕜
+    refine ⟨‖C‖⁻¹, by positivity, fun ε hε ↦ ?_⟩
+    obtain ⟨x, hx⟩ := hK ε (by positivity)
+    have : x ≠ 0 := by aesop
+    obtain ⟨η, hη, h₁, h₂, h₃⟩ := rescale_to_shell hC (ε := 1) (by simp) this
+    refine ⟨η • x, h₁.le, by simpa using h₂, ?_⟩
+    grw [map_smul, norm_smul, hx, mul_left_comm, ← norm_smul]
+    linear_combination ε * h₁
+  obtain ⟨c, hc₀, hc⟩ := hK
   obtain ⟨φ, hφ_anti, hφ_pos, hφ⟩ := exists_seq_strictAnti_tendsto (0 : ℝ)
-  have (n : ℕ) : ∃ x, ‖x‖ = 1 ∧ ‖(T - μ • 1) x‖ < φ n := this (φ n) (hφ_pos n)
-  choose x hx_norm hx_bound using this
+  -- Then find a sequence of vectors `xₙ` with norm in the interval `[c, 1]` such
+  -- that `‖(T - μ • 1) xₙ‖ < φ n`, where `φ n` is a sequence of positive numbers tending to zero.
+  have (n : ℕ) : ∃ x, ‖x‖ ≤ 1 ∧ c ≤ ‖x‖ ∧ ‖(T - μ • 1) x‖ < φ n := hc (φ n) (hφ_pos n)
+  choose x hx_norm_upper hx_norm_lower hx_bound using this
   have hx_lim : Tendsto (fun n ↦ (T - μ • 1) (x n)) atTop (𝓝 0) := squeeze_zero_norm (by grind) hφ
   -- Define the sequence of vectors yₙ := T xₙ
   let y_ (n : ℕ) : X := T (x n)
   -- which are bounded away from zero.
-  have hy_lower : ∀ᶠ n in atTop, ‖μ‖ / 2 ≤ ‖y_ n‖ := by
-    filter_upwards [hφ.eventually_le_const (show ‖μ‖ / 2 > 0 by positivity)] with n hn
+  have hy_lower : ∃ d > 0, ∀ᶠ n in atTop, d ≤ ‖y_ n‖ := by
+    refine ⟨(‖μ‖ * c) / 2, by positivity, ?_⟩
+    filter_upwards [hφ.eventually_le_const (show (‖μ‖ * c) / 2 > 0 by positivity)] with n hn
     have h₁ : ‖T (x n) - μ • x n‖ < φ n := by simpa using hx_bound n
-    have h₂ : ‖μ‖ ≤ ‖T (x n)‖ + ‖T (x n) - μ • x n‖ := by
-      simpa [norm_smul, hx_norm] using norm_le_norm_add_norm_sub (T (x n)) (μ • x n)
-    grind
-  -- The sequence yₙ is contained in the image of the closed unit ball under T, which is compact,
+    have h₂ : ‖μ‖ * ‖x n‖ ≤ ‖T (x n)‖ + ‖T (x n) - μ • x n‖ := by
+      simpa [norm_smul] using norm_le_norm_add_norm_sub (T (x n)) (μ • x n)
+    linear_combination h₂ + h₁ + hn + ‖μ‖ * hx_norm_lower n
+ -- The sequence yₙ is contained in the image of the closed unit ball under T, which is compact,
   -- since T is, so we can extract a convergent subsequence, and say y_ (ψ n) → y.
   obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact 1
   obtain ⟨y, hyK, ψ, hψ, hψy⟩ := hK.tendsto_subseq (x := y_) (fun n ↦ hK' ⟨x n, by simp [*], rfl⟩)
@@ -89,11 +110,11 @@ theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
     exact this.continuousAt.tendsto.comp hψy
   -- Since yₙ are bounded away from 0, we must have y ≠ 0.
   have hy_ne : y ≠ 0 := by
+    obtain ⟨d, hd₀, hd⟩ := hy_lower
     rintro rfl
     suffices ∀ᶠ n : ℕ in atTop, False by rwa [eventually_const] at this
     rw [NormedAddCommGroup.tendsto_nhds_zero] at hψy
-    specialize hψy (‖μ‖ / 2) (by positivity)
-    filter_upwards [hψ.tendsto_atTop.eventually hy_lower, hψy] using by grind
+    filter_upwards [hψ.tendsto_atTop.eventually hd, hψy d (by positivity)] using by grind
   -- So y is an eigenvector of T with eigenvalue μ,
   have : HasEigenvector (T : End 𝕜 X) μ y := by
     simpa [hasEigenvector_iff, mem_genEigenspace_one, hy_ne, sub_eq_zero] using hy_eigen'
@@ -116,8 +137,6 @@ theorem riesz_lemma_one
   have h₁ := h ((‖x₀‖ : 𝕜) • y) (F.smul_mem _ hy)
   rwa [← le_inv_mul_iff₀' (by simpa), ← h₂, smul_sub, inv_smul_smul₀] at h₁
   simpa using hx₀'
-
-#find_home! riesz_lemma_one
 
 /--
 Given an endomorphism `S` of a normed space that's a closed embedding but not surjective, we can
@@ -201,16 +220,6 @@ theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
   apply hp
   simp [hψ.injective.eq_iff]
 
-def ContinuousLinearMap.toLinearMapAlgHom
-    {R₁ : Type*} [CommSemiring R₁] {M₁ : Type*}
-    [TopologicalSpace M₁] [CommRing M₁] [Algebra R₁ M₁] [IsScalarTower R₁ R₁ M₁]
-    [ContinuousAdd M₁] [ContinuousConstSMul R₁ M₁] [IsTopologicalAddGroup M₁] :
-    (M₁ →L[R₁] M₁) →ₐ[R₁] M₁ →ₗ[R₁] M₁ where
-  toRingHom := ContinuousLinearMap.toLinearMapRingHom
-  commutes' r := by
-    ext x
-    simp
-
 theorem ContinuousLinearMap.isUnit_toLinearMap_iff {𝕜 X : Type*} [NontriviallyNormedField 𝕜]
     [NormedAddCommGroup X] [NormedSpace 𝕜 X] [CompleteSpace X] {T : X →L[𝕜] X} :
     IsUnit T ↔ IsUnit (T : End 𝕜 X) := by
@@ -233,19 +242,3 @@ theorem hasEigenvalue_iff_mem_spectrum [CompleteSpace X] (hT : IsCompactOperator
     exact hμ'.mem_spectrum
   · intro h
     exact (fredholm_alternative hT hμ).resolve_right h
-
-theorem IsCompactOperator.forall_eigenspace_ne_bot_iff_eq_zero
-    {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [InnerProductSpace 𝕜 X] [CompleteSpace X]
-    {T : X →L[𝕜] X}
-    (hT : IsCompactOperator T)
-    (hT' : (T : End 𝕜 X).IsSymmetric) :
-    (∀ μ, HasEigenvalue (T : End 𝕜 X) μ → μ = 0) ↔ T = 0 := by
-  constructor
-  · intro h
-    rw [← ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric] at hT'
-    -- have := CStarAlgebra.norm_or_neg_norm_mem_spectrum (a := (T : End 𝕜 X))
-    sorry
-  · rintro rfl μ h
-    obtain ⟨v, hv⟩ := h.exists_hasEigenvector
-    simp [hasEigenvector_iff] at hv
-    grind [smul_eq_zero]
