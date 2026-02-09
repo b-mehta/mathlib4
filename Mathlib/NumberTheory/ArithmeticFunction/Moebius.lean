@@ -5,8 +5,10 @@ Authors: Aaron Anderson
 -/
 module
 
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.Algebra.Order.AbsoluteValue.Basic
 public import Mathlib.NumberTheory.ArithmeticFunction.Misc
-public import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+public import Mathlib.Tactic.Ring
 /-!
 # The Möbius function and Möbius inversion
 
