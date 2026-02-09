@@ -3,9 +3,10 @@ Copyright (c) 2025 Bhavik Mehta. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bhavik Mehta
 -/
+module
 
-import Mathlib.Combinatorics.SimpleGraph.Coloring
 import Mathlib.Topology.Compactness.Compact
+public import Mathlib.Data.Set.Finite.Basic
 
 /-!
 # Combinatorial compactness and the Rado selection lemma
@@ -46,6 +47,8 @@ have the finite intersection property, so their intersection is nonempty.
 * Rado, R. (1949). "Axiomatic treatment of rank in infinite sets".
 
 -/
+
+public section
 
 /--
 Given a (dependent) function `g s : (a : α) → β a` for each finset `s` of `α`, provided that
@@ -124,3 +127,5 @@ theorem Set.Finite.rado_selection_subtype {α : Type*} {β : α → Type*} [∀ 
   obtain ⟨t, ht, hst⟩ := hχ hs.toFinset
   simp only [Set.Finite.toFinset_subset] at ht
   exact ⟨t, by simp_all⟩
+
+end
