@@ -6,6 +6,7 @@ Authors: Aaron Anderson
 module
 
 public import Mathlib.NumberTheory.ArithmeticFunction.Misc
+public import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 /-!
 # The Möbius function and Möbius inversion
 
