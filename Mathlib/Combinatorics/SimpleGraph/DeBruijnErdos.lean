@@ -10,14 +10,44 @@ import Mathlib.Topology.Compactness.Compact
 /-!
 # Combinatorial compactness and the Rado selection lemma
 
-This file proves the Rado selection lemma in a number of variants, as an application of compactness
-to combinatorics. Many (though not all) uses of compactness arguments in combinatorics can be
-formulated using this lemma.
+This file contains compactness arguments for constructing infinite objects from finite
+approximations. The main result is a formalization of Rado's selection principle, as an application 
+of compactness to combinatorics.
 
 We give four versions, depending on whether the "partial" functions are defined locally or globally,
 and whether we use `Finset` or `Set.Finite`. The precise formulation of the lemma is therefore
 `Finset.rado_selection_subtype` or `Set.Finite.rado_selection_subtype`, but the versions avoiding
 subtypes are easier to prove and often easier to apply, so they are provided too.
+
+## Main results
+
+* `Finset.rado_selection`: Given functions `g : Finset α → α → β` where `β` is finite,
+  there exists a single function `χ : α → β` which is constructed out of `g`.
+  More precisely, for each finite set `s`, there exists a larger set `t ⊇ s` such that
+  `χ` and `g t` agree on `s`.
+
+* `Finset.rado_selection_subtype`: A variant where `g` takes subtype elements.
+
+* `Set.Finite.rado_selection`: Extension to finite subsets of arbitrary sets.
+
+* `nonempty_hom_of_forall_finite_subgraph_hom`: If every finite induced subgraph of `G`
+  admits a homomorphism to `F`, then so does `G` (when `F` is finite).
+
+* `deBruijn_erdos`: The de Bruijn–Erdős theorem: if every finite subgraph of a graph `G`
+  is `k`-colourable, then `G` is `k`-colourable.
+
+## Implementation notes
+
+The proof uses the fact that the product of finite discrete spaces is compact
+(by Tychonoff's theorem). The closed sets corresponding to "agreeing with `g s` on `s`"
+have the finite intersection property, so their intersection is nonempty.
+
+## References
+
+* de Bruijn, N. G.; Erdős, P. (1951). "A colour problem for infinite graphs and a problem
+  in the theory of relations".
+* Rado, R. (1949). "Axiomatic treatment of rank in infinite sets".
+
 -/
 
 /--
@@ -97,35 +127,3 @@ theorem Set.Finite.rado_selection_subtype {α : Type*} {β : α → Type*} [∀ 
   obtain ⟨t, ht, hst⟩ := hχ hs.toFinset
   simp only [Set.Finite.toFinset_subset] at ht
   exact ⟨t, by simp_all⟩
-
-/--
-Given a graph homomorphism from every finite subgraph of `G` to a finite graph `F`, we can find
-a graph homomorphism from (the entirety of) `G` to `F`.
--/
-theorem nonempty_hom_of_forall_finite_subgraph_hom {V W : Type*} [Finite W]
-    {G : SimpleGraph V} {F : SimpleGraph W}
-    (h : ∀ G' : G.Subgraph, G'.verts.Finite → G'.coe →g F) : Nonempty (G →g F) := by
-  have := G.toSubgraph
-  let g : (s : Set V) → s.Finite → s → W := fun s hs ↦ h (SimpleGraph.Subgraph.induce ⊤ s) hs
-  obtain ⟨χ, hχ⟩ := Set.Finite.rado_selection_subtype (β := fun _ ↦ W) g
-  refine ⟨⟨χ, ?_⟩⟩
-  intro a b hab
-  let a' : (G.subgraphOfAdj hab).verts := ⟨a, by simp⟩
-  let b' : (G.subgraphOfAdj hab).verts := ⟨b, by simp⟩
-  have hab' : (G.subgraphOfAdj hab).Adj a' b' := by simp [a', b']
-  change F.Adj (χ a') (χ b')
-  obtain ⟨H, hHfin, hHsub, hHeq⟩ := hχ (G.subgraphOfAdj hab).verts (by simp)
-  rw [hHeq, hHeq]
-  simp only [SimpleGraph.subgraphOfAdj_verts, SimpleGraph.Subgraph.induce_verts, g]
-  apply (h ((⊤ : G.Subgraph).induce H) hHfin).map_adj
-  simp only [SimpleGraph.subgraphOfAdj_verts, Set.insert_subset_iff,
-    Set.singleton_subset_iff] at hHsub
-  simp_all [a', b']
-
-/--
-Given a finite colouring of every finite subgraph of a graph `G`, we can find a colouring of `G`
-with the same colouring set.
--/
-theorem deBruijn_erdos {α β : Type*} (G : SimpleGraph α) [Finite β]
-    (h : ∀ G' : G.Subgraph, G'.verts.Finite → G'.coe.Coloring β) : Nonempty (G.Coloring β) :=
-  nonempty_hom_of_forall_finite_subgraph_hom h
