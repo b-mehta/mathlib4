@@ -6,7 +6,7 @@ Authors: Patience Ablett, Kevin Buzzard, Harald Carlens, Wayne Ng Kwing King, Mi
 -/
 module
 
-public import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
 public import Mathlib.AlgebraicGeometry.ValuativeCriterion
 
@@ -292,7 +292,7 @@ theorem valuativeCriterion_existence_aux
           · ext i; congr 1; ring
           · ring
       _ ≤ (∏ i : ι, ψ i₀ ^ (d i * ai i)) * ψ i₀ ^ (d i₀ * a * (d j - 1)) := by
-          gcongr with i; exacts [fun i _ ↦ zero_le', zero_le', hi₀ i]
+          gcongr with i; exact hi₀ i
       _ = ψ i₀ ^ (d i₀ * a * d j) := by
           rw [Finset.prod_pow_eq_pow_sum, ← pow_add]
           simp_rw [mul_comm (d _) (ai _), hai]
