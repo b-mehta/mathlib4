@@ -26,15 +26,12 @@ subtypes are easier to prove and often easier to apply, so they are provided too
   More precisely, for each finite set `s`, there exists a larger set `t ⊇ s` such that
   `χ` and `g t` agree on `s`.
 
-* `Finset.rado_selection_subtype`: A variant where `g` takes subtype elements.
+* `Finset.rado_selection_subtype`: A variant where `g` takes elements in the subtype.
 
-* `Set.Finite.rado_selection`: Extension to finite subsets of arbitrary sets.
+* `Set.Finite.rado_selection`: A variant using `Set.Finite`.
 
-* `nonempty_hom_of_forall_finite_subgraph_hom`: If every finite induced subgraph of `G`
-  admits a homomorphism to `F`, then so does `G` (when `F` is finite).
-
-* `deBruijn_erdos`: The de Bruijn–Erdős theorem: if every finite subgraph of a graph `G`
-  is `k`-colourable, then `G` is `k`-colourable.
+* `Set.Finite.rado_selection`: A variant using `Set.Finite` and where `g` takes elements in the
+  subtype.
 
 ## Implementation notes
 
