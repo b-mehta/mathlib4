@@ -336,6 +336,189 @@ theorem Set.Finite.of_summable_const [AddCommGroup α] [LinearOrder α] [IsOrder
 
 end LinearOrder
 
+section
+
+section OrderedCommMonoidWithZero
+
+variable [CommMonoidWithZero α] [PartialOrder α] [ZeroLEOneClass α] [PosMulMono α]
+  [TopologicalSpace α] [OrderClosedTopology α] {f g : ι → α}
+  {a a₁ a₂ : α}
+
+theorem hasProd_le₀ (h0 : ∀ i, 0 ≤ f i) (h1 : ∀ i, f i ≤ g i)
+    (hf : HasProd f a₁ L) (hg : HasProd g a₂ L) [L.NeBot] :
+    a₁ ≤ a₂ :=
+  le_of_tendsto_of_tendsto' hf hg fun _ ↦ Finset.prod_le_prod (fun i _ ↦ h0 i) (fun i _ ↦ h1 i)
+
+theorem hasProd_mono₀ (hf : HasProd f a₁ L) (hg : HasProd g a₂ L)
+    (h0 : 0 ≤ f) (h1 : f ≤ g) [L.NeBot] : a₁ ≤ a₂ :=
+  hasProd_le₀ h0 h1 hf hg
+
+theorem hasProd_le_inj₀ {g : κ → α} (e : ι → κ) (he : Injective e)
+    (hs : ∀ c, c ∉ Set.range e → 1 ≤ g c) (h0 : ∀ i, 0 ≤ f i) (h1 : ∀ i, f i ≤ g (e i))
+    (hf : HasProd f a₁) (hg : HasProd g a₂) : a₁ ≤ a₂ := by
+  rw [← hasProd_extend_one he] at hf
+  refine hasProd_le₀ (fun c ↦ ?_) (fun c ↦ ?_) hf hg
+  · obtain ⟨i, rfl⟩ | h := em (c ∈ Set.range e)
+    · rw [he.extend_apply]
+      exact h0 i
+    · rw [extend_apply' _ _ _ h]
+      simp
+  · obtain ⟨i, rfl⟩ | h := em (c ∈ Set.range e)
+    · rw [he.extend_apply]
+      exact h1 _
+    · rw [extend_apply' _ _ _ h]
+      exact hs _ h
+
+protected theorem Multipliable.tprod_le_tprod_of_inj₀ {g : κ → α} (e : ι → κ) (he : Injective e)
+    (hs : ∀ c, c ∉ Set.range e → 1 ≤ g c) (h0 : ∀ i, 0 ≤ f i) (h1 : ∀ i, f i ≤ g (e i))
+    (hf : Multipliable f) (hg : Multipliable g) : tprod f ≤ tprod g :=
+  hasProd_le_inj₀ _ he hs h0 h1 hf.hasProd hg.hasProd
+
+theorem prod_le_hasProd₀ [L.NeBot] [L.LeAtTop] (s : Finset ι) (hs : ∀ i, i ∉ s → 1 ≤ f i)
+    (hf : HasProd f a L) : ∏ i ∈ s, f i ≤ a := by
+  refine ge_of_tendsto hf <| .filter_mono L.le_atTop <| eventually_atTop.2 ?_
+  exact ⟨s, fun _t hst ↦ prod_le_prod_of_subset_of_one_le' hst fun i _ hbs ↦ hs i hbs⟩
+
+theorem isLUB_hasProd (h : ∀ i, 1 ≤ f i) (hf : HasProd f a) :
+    IsLUB (Set.range fun s ↦ ∏ i ∈ s, f i) a := by
+  classical
+  exact isLUB_of_tendsto_atTop (Finset.prod_mono_set_of_one_le' h) hf
+
+@[to_additive]
+theorem le_hasProd [L.NeBot] [L.LeAtTop] (hf : HasProd f a L) (i : ι) (hb : ∀ j, j ≠ i → 1 ≤ f j) :
+    f i ≤ a :=
+  calc
+    f i = ∏ i ∈ {i}, f i := by rw [prod_singleton]
+    _ ≤ a := prod_le_hasProd _ (by simpa) hf
+
+@[to_additive]
+theorem lt_hasProd [L.NeBot] [L.LeAtTop] [MulRightStrictMono α] (hf : HasProd f a L) (i : ι)
+    (hi : ∀ (j : ι), j ≠ i → 1 ≤ f j) (j : ι) (hij : j ≠ i) (hj : 1 < f j) :
+    f i < a := by
+  classical
+  calc
+    f i < f j * f i := lt_mul_of_one_lt_left' (f i) hj
+    _ = ∏ k ∈ {j, i}, f k := by rw [Finset.prod_pair hij]
+    _ ≤ a := prod_le_hasProd _ (fun k hk ↦ hi k (hk ∘ mem_insert_of_mem ∘ mem_singleton.mpr)) hf
+
+@[to_additive]
+protected theorem Multipliable.prod_le_tprod [L.NeBot] [L.LeAtTop] {f : ι → α} (s : Finset ι)
+    (hs : ∀ i, i ∉ s → 1 ≤ f i) (hf : Multipliable f L) :
+    ∏ i ∈ s, f i ≤ ∏'[L] i, f i :=
+  prod_le_hasProd s hs hf.hasProd
+
+@[to_additive]
+protected theorem Multipliable.le_tprod [L.NeBot] [L.LeAtTop] (hf : Multipliable f L) (i : ι)
+    (hb : ∀ j ≠ i, 1 ≤ f j) : f i ≤ ∏'[L] i, f i :=
+  le_hasProd hf.hasProd i hb
+
+@[to_additive (attr := gcongr)]
+protected theorem Multipliable.tprod_le_tprod [L.NeBot] (h : ∀ i, f i ≤ g i) (hf : Multipliable f L)
+    (hg : Multipliable g L) : ∏'[L] i, f i ≤ ∏'[L] i, g i :=
+  hasProd_le h hf.hasProd hg.hasProd
+
+@[to_additive (attr := mono)]
+protected theorem Multipliable.tprod_mono [L.NeBot] (hf : Multipliable f L) (hg : Multipliable g L)
+    (h : f ≤ g) : ∏'[L] n, f n ≤ ∏'[L] n, g n :=
+  hf.tprod_le_tprod h hg
+
+omit [IsOrderedMonoid α] in
+@[to_additive]
+protected theorem Multipliable.tprod_le_of_prod_le [L.NeBot] (hf : Multipliable f L)
+    (h : ∀ s, ∏ i ∈ s, f i ≤ a₂) : ∏'[L] i, f i ≤ a₂ :=
+  hasProd_le_of_prod_le hf.hasProd h
+
+omit [IsOrderedMonoid α] in
+@[to_additive]
+theorem tprod_le_of_prod_le' (ha₂ : 1 ≤ a₂) (h : ∀ s, ∏ i ∈ s, f i ≤ a₂) :
+    ∏'[L] i, f i ≤ a₂ := by
+  by_cases hL : L.NeBot
+  · by_cases hf : Multipliable f L
+    · exact hf.tprod_le_of_prod_le h
+    · rwa [tprod_eq_one_of_not_multipliable hf]
+  · by_cases hf : f.mulSupport.Finite
+    · simpa [tprod_bot hL, finprod_eq_prod _ hf] using h _
+    · rwa [tprod_bot hL, finprod_of_infinite_mulSupport hf]
+
+@[to_additive]
+theorem HasProd.one_le [L.NeBot] (h : ∀ i, 1 ≤ g i) (ha : HasProd g a L) : 1 ≤ a :=
+  hasProd_le h hasProd_one ha
+
+@[to_additive]
+theorem HasProd.le_one [L.NeBot] (h : ∀ i, g i ≤ 1) (ha : HasProd g a L) : a ≤ 1 :=
+  hasProd_le h ha hasProd_one
+
+@[to_additive tsum_nonneg]
+theorem one_le_tprod (h : ∀ i, 1 ≤ g i) : 1 ≤ ∏'[L] i, g i := by
+  by_cases hg : Multipliable g L
+  · by_cases hL : L.NeBot
+    · exact hg.hasProd.one_le h
+    · simpa [tprod_bot hL] using one_le_finprod' h
+  · rw [tprod_eq_one_of_not_multipliable hg]
+
+@[to_additive]
+theorem tprod_le_one (h : ∀ i, f i ≤ 1) : ∏'[L] i, f i ≤ 1 := by
+  by_cases hf : Multipliable f L
+  · by_cases hL : L.NeBot
+    · exact hf.hasProd.le_one h
+    · simp only [tprod_bot hL]
+      exact finprod_induction (· ≤ 1) le_rfl (fun _ _ ↦ mul_le_one') h
+  · rw [tprod_eq_one_of_not_multipliable hf]
+
+@[to_additive]
+theorem hasProd_one_iff_of_one_le [L.LeAtTop] [L.NeBot] (hf : ∀ i, 1 ≤ f i) :
+    HasProd f 1 L ↔ f = 1 := by
+  refine ⟨fun hf' ↦ ?_, ?_⟩
+  · ext i
+    exact (hf i).antisymm' (le_hasProd hf' _ fun j _ ↦ hf j)
+  · rintro rfl
+    exact hasProd_one
+
+end OrderedCommMonoid
+
+section OrderedCommGroup
+
+variable [CommGroup α] [PartialOrder α] [IsOrderedMonoid α]
+  [TopologicalSpace α] [IsTopologicalGroup α]
+  [OrderClosedTopology α] {f g : ι → α} {a₁ a₂ : α} {i : ι}
+
+@[to_additive]
+theorem hasProd_lt [L.NeBot] [L.LeAtTop] (h : f ≤ g) (hi : f i < g i) (hf : HasProd f a₁ L)
+    (hg : HasProd g a₂ L) : a₁ < a₂ := by
+  classical
+  have : update f i 1 ≤ update g i 1 := update_le_update_iff.mpr ⟨rfl.le, fun i _ ↦ h i⟩
+  have : 1 / f i * a₁ ≤ 1 / g i * a₂ := hasProd_le this (hf.update i 1) (hg.update i 1)
+  simpa only [one_div, mul_inv_cancel_left] using mul_lt_mul_of_lt_of_le hi this
+
+@[to_additive (attr := mono)]
+theorem hasProd_strict_mono (hf : HasProd f a₁) (hg : HasProd g a₂) (h : f < g) : a₁ < a₂ :=
+  let ⟨hle, _i, hi⟩ := Pi.lt_def.mp h
+  hasProd_lt hle hi hf hg
+
+@[to_additive]
+protected theorem Multipliable.tprod_lt_tprod [L.NeBot] [L.LeAtTop]
+    (h : f ≤ g) (hi : f i < g i) (hf : Multipliable f L) (hg : Multipliable g L) :
+    ∏'[L] n, f n < ∏'[L] n, g n :=
+  hasProd_lt h hi hf.hasProd hg.hasProd
+
+@[to_additive (attr := mono)]
+protected theorem Multipliable.tprod_strict_mono [L.NeBot] [L.LeAtTop]
+    (hf : Multipliable f L) (hg : Multipliable g L)
+    (h : f < g) : ∏'[L] n, f n < ∏'[L] n, g n :=
+  let ⟨hle, _i, hi⟩ := Pi.lt_def.mp h
+  hf.tprod_lt_tprod hle hi hg
+
+@[to_additive Summable.tsum_pos]
+protected theorem Multipliable.one_lt_tprod [L.LeAtTop] [L.NeBot] (hsum : Multipliable g L)
+    (hg : ∀ i, 1 ≤ g i) (i : ι) (hi : 1 < g i) : 1 < ∏'[L] i, g i := by
+  rw [← tprod_one (L := L)]
+  exact multipliable_one.tprod_lt_tprod hg hi hsum
+
+end OrderedCommGroup
+
+end
+
+
 section LinearOrderedCommRing
 
 variable [CommRing α] [LinearOrder α] [IsStrictOrderedRing α]
