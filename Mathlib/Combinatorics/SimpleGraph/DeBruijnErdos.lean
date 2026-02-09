@@ -11,7 +11,7 @@ import Mathlib.Topology.Compactness.Compact
 # Combinatorial compactness and the Rado selection lemma
 
 This file contains compactness arguments for constructing infinite objects from finite
-approximations. The main result is a formalization of Rado's selection principle, as an application 
+approximations. The main result is a formalization of Rado's selection principle, as an application
 of compactness to combinatorics.
 
 We give four versions, depending on whether the "partial" functions are defined locally or globally,
