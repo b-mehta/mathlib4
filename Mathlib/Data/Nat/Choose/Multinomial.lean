@@ -6,6 +6,7 @@ Authors: Kyle Miller, Pim Otte
 module
 
 public import Mathlib.Algebra.Order.Antidiag.Pi
+public import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 public import Mathlib.Data.Finsupp.Multiset
 public import Mathlib.Data.Nat.Choose.Sum
 public import Mathlib.Data.Nat.Factorial.BigOperators
