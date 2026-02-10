@@ -29,7 +29,7 @@ The main result is the Fredholm alternative for compact operators.
 -/
 
 -- let X be a Banach space
-variable {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+variable {𝕜 X : Type*} [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
 -- and T be a compact operator on it
 variable {T : X →L[𝕜] X}
 
@@ -37,7 +37,7 @@ open Module End
 
 /-- If a continuous linear map `f` satisfies `‖x‖ = 1 → 1 ≤ K * ‖f x‖`, then `f` is
 antilipschitz with constant `K`. -/
-lemma ContinuousLinearMap.antilipschitz_of_bound_of_norm_one {X Y : Type*}
+lemma ContinuousLinearMap.antilipschitz_of_bound_of_norm_one {𝕜 : Type*} [RCLike 𝕜] {X Y : Type*}
     [NormedAddCommGroup X] [NormedSpace 𝕜 X] [NormedAddCommGroup Y] [NormedSpace 𝕜 Y]
     (f : X →L[𝕜] Y) {K : NNReal} (h : ∀ x, ‖x‖ = 1 → 1 ≤ K * ‖f x‖) :
     AntilipschitzWith K f :=
@@ -51,10 +51,8 @@ open Filter Topology in
 eigenvalue of `T`, then `T - μ • 1` is antilipschitz with positive constant.
 That is, `T - μ • 1` is bounded below as an operator.
 
-This is a useful step in the proof of the Fredholm alternative. -/
-theorem antilipschitz_of_not_hasEigenvalue {𝕜 X : Type*} [NontriviallyNormedField 𝕜]
-    [NormedAddCommGroup X] [NormedSpace 𝕜 X]
-    {T : X →L[𝕜] X} (hT : IsCompactOperator T)
+This is a useful step in the proof of the Fredholm alternative. for compact operators. -/
+theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
     {μ : 𝕜} (hμ : μ ≠ 0) (h : ¬ HasEigenvalue (T : End 𝕜 X) μ) :
     ∃ K > 0, AntilipschitzWith K (T - μ • 1 : X →L[𝕜] X) := by
   -- Suppose not, then for every K > 0, there is some x such that ‖(T - μ • 1) x‖ < K * ‖x‖.
@@ -121,7 +119,7 @@ theorem antilipschitz_of_not_hasEigenvalue {𝕜 X : Type*} [NontriviallyNormedF
   -- which is a contradiction.
   exact h (hasEigenvalue_of_hasEigenvector this)
 
-/-- A variation of Riesz's lemma where we get a vector `x₀` of norm exactly 1. -/
+/-- A variation of Riesz's lemma for where we get a vector `x₀` of norm exactly 1. -/
 theorem riesz_lemma_one
     {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     {F : Subspace 𝕜 E} (hFc : IsClosed (F : Set E)) (hF : ∃ (x : E), x ∉ F) {r : ℝ} (hr : r < 1) :
@@ -140,17 +138,18 @@ theorem riesz_lemma_one
 
 /--
 Given an endomorphism `S` of a normed space that's a closed embedding but not surjective, we can
-find a sequence of unit vectors `f n`, such that `f n` is in the range of `S ^ n` but is at least
-`1/2` away from any vector in the range of `S ^ (n + 1)`.
+find a sequence of vectors `f n`, living inside a shell, such that `f n` is in the
+range of `S ^ n` but is at least `1` away from any vector in the range of `S ^ (n + 1)`.
+This is a useful construction for the proof of the Fredholm alternative for compact operators.
 -/
-theorem thing {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
-    {S : End 𝕜 X}
-    (hS_not_surj : ¬ (S : X → X).Surjective)
+theorem exists_seq {𝕜 X : Type*}
+    [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+    {S : End 𝕜 X} (hS_not_surj : ¬ (S : X → X).Surjective)
     (hS_anti : Topology.IsClosedEmbedding S)
-    {r : ℝ} (hr : r < 1) :
+    {c : 𝕜} (hc : 1 < ‖c‖) {R : ℝ} (hR : ‖c‖ < R) :
     ∃ f : ℕ → X,
-      (∀ n, ‖f n‖ = 1) ∧ (∀ n, f n ∈ (S ^ n).range) ∧
-      (∀ n, ∀ y ∈ (S ^ (n + 1)).range, r ≤ ‖f n - y‖) := by
+      (∀ n, 1 ≤ ‖f n‖) ∧ (∀ n, ‖f n‖ ≤ R) ∧ (∀ n, f n ∈ (S ^ n).range) ∧
+      (∀ n, ∀ y ∈ (S ^ (n + 1)).range, 1 ≤ ‖f n - y‖) := by
   obtain ⟨x, hx⟩ : ∃ x : X, ∀ y, S y ≠ x := by simpa [Function.Surjective] using hS_not_surj
   let V (n : ℕ) : Submodule 𝕜 X := S.iterateRange n
   have hV_succ (n : ℕ) : V (n + 1) = (V n).map (S : End 𝕜 X) := LinearMap.iterateRange_succ
@@ -160,21 +159,24 @@ theorem thing {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace
     | succ n ih =>
       rw [hV_succ]
       apply hS_anti.isClosedMap _ ih
-  have x (n : ℕ) : ∃ x ∈ V n, ‖x‖ = 1 ∧ ∀ y ∈ V (n + 1), r ≤ ‖x - y‖ := by
+  have x (n : ℕ) : ∃ x ∈ V n, 1 ≤ ‖x‖ ∧ ‖x‖ ≤ R ∧ ∀ y ∈ V (n + 1), 1 ≤ ‖x - y‖ := by
     have h₁ : IsClosed (Submodule.comap (V n).subtype (V (n + 1)) : Set (V n)) := by
       simpa using (hV_closed (n + 1)).preimage_val
     have h₂ : ∃ x : V n, x ∉ (V (n + 1)).comap (V n).subtype := by
       simpa [iterate_succ, V, (iterate_injective hS_anti.injective n).eq_iff] using by use x
-    obtain ⟨⟨x, hx⟩, hx', hxn, hxy⟩ := riesz_lemma_one h₁ h₂ hr
+    obtain ⟨⟨x, hx⟩, hxn, hxy⟩ := riesz_lemma_of_norm_lt hc hR h₁ h₂
     simp only [Submodule.mem_comap, Submodule.subtype_apply, AddSubgroupClass.coe_norm,
-      AddSubgroupClass.coe_sub, Subtype.forall] at hx' hxn hxy
-    exact ⟨x, hx, hxn, fun y hy ↦ hxy y (S.iterateRange.monotone (by simp) hy) hy⟩
-  choose x hxv hxn hxy using x
-  exact ⟨x, hxn, hxv, hxy⟩
+      AddSubgroupClass.coe_sub, Subtype.forall] at hxn hxy
+    exact ⟨x, hx, (by simpa using hxy 0), hxn,
+      fun y hy ↦ hxy y (S.iterateRange.monotone (by simp) hy) hy⟩
+  choose x hxv hxn hxn' hxy using x
+  exact ⟨x, hxn, hxn', hxv, hxy⟩
 
 /-- The Fredholm alternative for compact operators: if `T` is a compact operator and `μ ≠ 0`,
 then either `μ` is an eigenvalue of `T`, or `μ` is in the resolvent set of `T`. -/
-theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
+theorem fredholm_alternative {𝕜 X : Type*}
+    [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+    [CompleteSpace X] {T : X →L[𝕜] X} (hT : IsCompactOperator T)
     {μ : 𝕜} (hμ : μ ≠ 0) : HasEigenvalue (T : End 𝕜 X) μ ∨ μ ∈ resolventSet 𝕜 T := by
   by_contra!
   obtain ⟨h₁, h₂⟩ := this
@@ -186,13 +188,15 @@ theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
     ext x
     simp [S]
   obtain ⟨K, -, hK : AntilipschitzWith K S⟩ := antilipschitz_of_not_hasEigenvalue hT hμ h₁
-  obtain ⟨f, hf_norm, hf_mem, hf_far⟩ := thing (mt (.intro hK.injective) h₂)
-    (hK.isClosedEmbedding S.uniformContinuous) (show 2⁻¹ < 1 by norm_num)
+  obtain ⟨c, hc⟩ := NormedField.exists_one_lt_norm 𝕜
+  obtain ⟨f, hf_norm_lower, hf_norm_upper, hf_mem, hf_far⟩ :=
+    exists_seq (mt (.intro hK.injective) h₂)
+    (hK.isClosedEmbedding S.uniformContinuous) (c := c) hc (R := ‖c‖ + 1) (by simp)
   have hf_mem' (n : ℕ) : S (f n) ∈ ((S : End 𝕜 X) ^ (n + 1)).range := by
     rw [iterate_succ']
     rw [LinearMap.range_comp]
     exact ⟨f n, hf_mem n, rfl⟩
-  have hp : Pairwise fun x₁ x₂ ↦ 2⁻¹ * ‖μ‖ ≤ ‖T (f x₁) - T (f x₂)‖ := by
+  have hp : Pairwise fun x₁ x₂ ↦ ‖μ‖ ≤ ‖T (f x₁) - T (f x₂)‖ := by
     intro m n hmn
     wlog! hmn' : m < n generalizing m n
     · rw [norm_sub_rev]
@@ -208,20 +212,19 @@ theorem fredholm_alternative [CompleteSpace X] (hT : IsCompactOperator T)
           (hf_mem' _)
       · exact Submodule.smul_mem _ μ ((S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem n))
     rw [← hu, norm_smul, mul_comm]
-    grw [hf_far _ u this]
-  obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact 1
+    grw [← hf_far _ u this, one_mul]
+  obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact (‖c‖ + 1)
   obtain ⟨y, hyK, ψ, hψ, hψy⟩ := hK.tendsto_subseq (fun n ↦ hK' ⟨f n, by simp [*], rfl⟩)
   replace hψy := hψy.cauchySeq
   rw [Metric.cauchySeq_iff'] at hψy
-  obtain ⟨N, hN⟩ := hψy (2⁻¹ * ‖μ‖) (by positivity)
+  obtain ⟨N, hN⟩ := hψy ‖μ‖ (by positivity)
   simp only [dist_eq_norm_sub, ContinuousLinearMap.coe_coe, Function.comp_apply] at hN
   have := hN (N + 1) (by simp)
   refine this.not_ge ?_
   apply hp
   simp [hψ.injective.eq_iff]
 
-theorem ContinuousLinearMap.isUnit_toLinearMap_iff {𝕜 X : Type*} [NontriviallyNormedField 𝕜]
-    [NormedAddCommGroup X] [NormedSpace 𝕜 X] [CompleteSpace X] {T : X →L[𝕜] X} :
+theorem ContinuousLinearMap.isUnit_toLinearMap_iff [CompleteSpace X] {T : X →L[𝕜] X} :
     IsUnit T ↔ IsUnit (T : End 𝕜 X) := by
   rw [ContinuousLinearMap.isUnit_iff_bijective, Module.End.isUnit_iff]
   rfl
