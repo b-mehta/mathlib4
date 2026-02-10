@@ -26,6 +26,8 @@ The main result is the Fredholm alternative for compact operators.
 * `antilipschitz_of_not_hasEigenvalue`: if `T` is a compact operator and `μ ≠ 0` is not an
   eigenvalue, then `T - μI` is antilipschitz.
 * `fredholm_alternative`: the Fredholm alternative for compact operators.
+
+We follow https://terrytao.wordpress.com/2011/04/10/a-proof-of-the-fredholm-alternative/
 -/
 
 -- let X be a Banach space
