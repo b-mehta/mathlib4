@@ -9,6 +9,7 @@ public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Analysis.Normed.Group.Lemmas
 public import Mathlib.Analysis.Normed.Affine.Isometry
 public import Mathlib.Analysis.Normed.Operator.NormedSpace
+public import Mathlib.Analysis.Normed.Operator.Compact
 public import Mathlib.Analysis.Normed.Module.RieszLemma
 public import Mathlib.Analysis.Normed.Module.Ball.Pointwise
 public import Mathlib.Analysis.SpecificLimits.Normed
@@ -539,6 +540,22 @@ lemma ProperSpace.of_locallyCompact_module [Nontrivial E] [LocallyCompactSpace E
     have : IsClosedEmbedding L := isClosedEmbedding_smul_left hv
     apply IsClosedEmbedding.locallyCompactSpace this
   .of_locallyCompactSpace 𝕜
+
+lemma FiniteDimensional.of_isCompactOperator_id (h : IsCompactOperator (id : E → E)) :
+    FiniteDimensional 𝕜 E := by
+  have : WeaklyLocallyCompactSpace E := by
+    apply WeaklyLocallyCompactSpace.mk
+    intro x
+    obtain ⟨S, hS, hS'⟩ := IsCompactOperator.image_subset_compact_of_bounded
+      (𝕜₁ := 𝕜) (𝕜₂ := 𝕜) (M₁ := E) (M₂ := E) (S := Metric.closedBall x 1) (f := LinearMap.id) h
+      Metric.isBounded_closedBall
+    refine ⟨S, hS, ?_⟩
+    have : closedBall x 1 ∈ 𝓝 x := Metric.closedBall_mem_nhds _ (by simp)
+    simp only [LinearMap.id_coe, id_eq, image_id'] at hS'
+    exact mem_of_superset this hS'
+  sorry
+
+#exit
 
 end Riesz
 

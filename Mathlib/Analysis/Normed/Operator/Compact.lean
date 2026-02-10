@@ -412,3 +412,17 @@ theorem isCompactOperator_of_tendsto {ι 𝕜₁ 𝕜₂ : Type*} [NontriviallyN
     {F : ι → M₁ →SL[σ₁₂] M₂} {f : M₁ →SL[σ₁₂] M₂} (hf : Tendsto F l (𝓝 f))
     (hF : ∀ᶠ i in l, IsCompactOperator (F i)) : IsCompactOperator f :=
   isClosed_setOf_isCompactOperator.mem_of_tendsto hf hF
+
+/-- A normed space whose identity is a compact operator is weakly locally compact. -/
+lemma WeaklyLocallyCompactSpace.of_isCompactOperator_id {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+    (h : IsCompactOperator (id : E → E)) : WeaklyLocallyCompactSpace E := by
+  constructor
+  intro x
+  obtain ⟨S, hS, hS'⟩ := IsCompactOperator.image_subset_compact_of_bounded
+    (𝕜₁ := 𝕜) (S := Metric.closedBall x 1) (f := LinearMap.id) h
+    Metric.isBounded_closedBall
+  refine ⟨S, hS, ?_⟩
+  simp only [LinearMap.id_coe, id_eq, image_id'] at hS'
+  have : closedBall x 1 ∈ 𝓝 x := Metric.closedBall_mem_nhds _ (by simp)
+  exact mem_of_superset (Metric.closedBall_mem_nhds _ (by simp)) hS'
