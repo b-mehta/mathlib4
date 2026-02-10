@@ -5,6 +5,7 @@ Authors: Violeta Hernández Palacios, Alex Brodbelt
 -/
 import Mathlib.Algebra.Order.Field.GeomSum
 import Mathlib.Data.NNReal.Basic
+import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
 /-!
 # IMO 1982 Q3
