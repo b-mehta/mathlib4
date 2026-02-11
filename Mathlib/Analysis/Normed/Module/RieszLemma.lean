@@ -122,7 +122,7 @@ theorem Metric.closedBall_infDist_compl_subset_closure {x : F} {s : Set F} (hx :
     exact closure_mono ball_infDist_compl_subset
 
 /--
-A version of Riesz lemma: given a strict closed subspace `F`, one may find an element of norm `1`
+A version of Riesz lemma: given a proper closed subspace `F`, one may find an element of norm `1`
 which is at distance at least `r` of every element of `F`, for any `r < 1`.
 For a version with weaker assumptions on the underlying field, see `riesz_lemma` or
 `riesz_lemma_of_norm_lt`.
