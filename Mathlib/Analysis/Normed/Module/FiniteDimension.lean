@@ -541,19 +541,20 @@ lemma ProperSpace.of_locallyCompact_module [Nontrivial E] [LocallyCompactSpace E
     apply IsClosedEmbedding.locallyCompactSpace this
   .of_locallyCompactSpace 𝕜
 
+/-- If the identity operator of a Banach space over a nontrivially normed field is compact,
+then the space is finite dimensional. -/
 lemma FiniteDimensional.of_isCompactOperator_id (h : IsCompactOperator (id : E → E)) :
     FiniteDimensional 𝕜 E := by
-  have : WeaklyLocallyCompactSpace E := by
-    apply WeaklyLocallyCompactSpace.mk
-    intro x
-    obtain ⟨S, hS, hS'⟩ := IsCompactOperator.image_subset_compact_of_bounded
-      (𝕜₁ := 𝕜) (𝕜₂ := 𝕜) (M₁ := E) (M₂ := E) (S := Metric.closedBall x 1) (f := LinearMap.id) h
-      Metric.isBounded_closedBall
-    refine ⟨S, hS, ?_⟩
-    have : closedBall x 1 ∈ 𝓝 x := Metric.closedBall_mem_nhds _ (by simp)
-    simp only [LinearMap.id_coe, id_eq, image_id'] at hS'
-    exact mem_of_superset this hS'
+  have := WeaklyLocallyCompactSpace.of_isCompactOperator_id h
+  exact FiniteDimensional.of_locallyCompactSpace 𝕜
+
+lemma isCompactOperator_of_locallyCompactSpace [LocallyCompactSpace F] {T : E →L[𝕜] F} :
+    IsCompactOperator (T : E → F) := by
+  refine (isCompactOperator_iff_isCompact_closure_image_ball T.toLinearMap
+    (r := 1) (hr := by simp)).2 ?_
   sorry
+
+
 
 #exit
 
