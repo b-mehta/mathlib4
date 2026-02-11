@@ -548,15 +548,15 @@ lemma FiniteDimensional.of_isCompactOperator_id (h : IsCompactOperator (id : E �
   have := WeaklyLocallyCompactSpace.of_isCompactOperator_id h
   exact FiniteDimensional.of_locallyCompactSpace 𝕜
 
+omit [CompleteSpace 𝕜] in
+/-- Any compact operator from a normed space to a locally compact space is compact. -/
 lemma isCompactOperator_of_locallyCompactSpace [LocallyCompactSpace F] {T : E →L[𝕜] F} :
     IsCompactOperator (T : E → F) := by
   refine (isCompactOperator_iff_isCompact_closure_image_ball T.toLinearMap
     (r := 1) (hr := by simp)).2 ?_
-  sorry
-
-
-
-#exit
+  have : ProperSpace F := ProperSpace.of_locallyCompactSpace 𝕜
+  rw [isCompact_iff_isClosed_bounded, isBounded_closure_iff]
+  exact ⟨by simp, T.lipschitz.isBounded_image isBounded_ball⟩
 
 end Riesz
 
