@@ -69,7 +69,7 @@ theorem isCompactOperator_zero {M₁ M₂ : Type*} [Zero M₁] [TopologicalSpace
   ⟨{0}, isCompact_singleton, mem_of_superset univ_mem fun _ _ => rfl⟩
 
 /--
-The identity of a topological additive group is a compact operator if it is weakly locally compact.
+The identity of a topological additive group is a compact operator implies it is weakly locally compact.
 -/
 lemma WeaklyLocallyCompactSpace.of_isCompactOperator_id
     {M₁ : Type*} [TopologicalSpace M₁] [AddCommGroup M₁] [ContinuousAdd M₁]
