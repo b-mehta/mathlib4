@@ -209,10 +209,8 @@ theorem fredholm_alternative {𝕜 X : Type*}
   replace hψy := hψy.cauchySeq
   rw [Metric.cauchySeq_iff'] at hψy
   obtain ⟨N, hN⟩ := hψy ‖μ‖ (by positivity)
-  simp only [dist_eq_norm_sub, ContinuousLinearMap.coe_coe, Function.comp_apply] at hN
-  have := hN (N + 1) (by simp)
-  refine this.not_ge ?_
-  apply hp
+  have : ‖T (f (ψ (N + 1))) - T (f (ψ N))‖ < ‖μ‖ := by simpa [dist_eq_norm_sub] using hN (N + 1)
+  refine this.not_ge (hp ?_)
   simp [hψ.injective.eq_iff]
 
 theorem ContinuousLinearMap.isUnit_toLinearMap_iff [CompleteSpace X] {T : X →L[𝕜] X} :
