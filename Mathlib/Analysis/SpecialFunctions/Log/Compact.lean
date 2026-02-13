@@ -37,23 +37,12 @@ variable {T : X →L[𝕜] X}
 
 open Module End
 
-/-- If a continuous linear map `f` satisfies `‖x‖ = 1 → 1 ≤ K * ‖f x‖`, then `f` is
-antilipschitz with constant `K`. -/
-lemma ContinuousLinearMap.antilipschitz_of_bound_of_norm_one {𝕜 : Type*} [RCLike 𝕜] {X Y : Type*}
-    [NormedAddCommGroup X] [NormedSpace 𝕜 X] [NormedAddCommGroup Y] [NormedSpace 𝕜 Y]
-    (f : X →L[𝕜] Y) {K : NNReal} (h : ∀ x, ‖x‖ = 1 → 1 ≤ K * ‖f x‖) :
-    AntilipschitzWith K f :=
-  ContinuousLinearMap.antilipschitz_of_bound _ fun x ↦ by
-    obtain rfl | hx := eq_or_ne x 0
-    · simp
-    simpa [norm_smul, field] using h ((‖x‖⁻¹ : 𝕜) • x) (norm_smul_inv_norm hx)
-
 open Filter Topology in
 /-- If `T : X →L[𝕜] X` is a compact operator on a Banach space `X`, and `μ ≠ 0` is not an
 eigenvalue of `T`, then `T - μ • 1` is antilipschitz with positive constant.
 That is, `T - μ • 1` is bounded below as an operator.
 
-This is a useful step in the proof of the Fredholm alternative. for compact operators. -/
+This is a useful step in the proof of the Fredholm alternative for compact operators. -/
 theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
     {μ : 𝕜} (hμ : μ ≠ 0) (h : ¬ HasEigenvalue (T : End 𝕜 X) μ) :
     ∃ K > 0, AntilipschitzWith K (T - μ • 1 : X →L[𝕜] X) := by
@@ -121,30 +110,13 @@ theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
   -- which is a contradiction.
   exact h (hasEigenvalue_of_hasEigenvector this)
 
-/-- A variation of Riesz's lemma for where we get a vector `x₀` of norm exactly 1. -/
-theorem riesz_lemma_one
-    {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    {F : Subspace 𝕜 E} (hFc : IsClosed (F : Set E)) (hF : ∃ (x : E), x ∉ F) {r : ℝ} (hr : r < 1) :
-    ∃ x₀ ∉ F, ‖x₀‖ = 1 ∧ ∀ y ∈ F, r ≤ ‖x₀ - y‖ := by
-  obtain ⟨x₀, hx₀, h⟩ := riesz_lemma hFc hF hr
-  have hx₀' : x₀ ≠ 0 := by rintro rfl; simp at hx₀
-  refine ⟨(‖x₀‖⁻¹ : 𝕜) • x₀, ?_, norm_smul_inv_norm hx₀', ?_⟩
-  · rwa [Submodule.smul_mem_iff]
-    simpa
-  intro y hy
-  have h₂ : ‖(‖x₀‖ : 𝕜)⁻¹ • (x₀ - (‖x₀‖ : 𝕜) • y)‖ = ‖x₀‖⁻¹ * ‖x₀ - (‖x₀‖ : 𝕜) • y‖ := by
-    rw [norm_smul, norm_inv, norm_algebraMap', norm_norm]
-  have h₁ := h ((‖x₀‖ : 𝕜) • y) (F.smul_mem _ hy)
-  rwa [← le_inv_mul_iff₀' (by simpa), ← h₂, smul_sub, inv_smul_smul₀] at h₁
-  simpa using hx₀'
-
 /--
 Given an endomorphism `S` of a normed space that's a closed embedding but not surjective, we can
 find a sequence of vectors `f n`, living inside a shell, such that `f n` is in the
 range of `S ^ n` but is at least `1` away from any vector in the range of `S ^ (n + 1)`.
 This is a useful construction for the proof of the Fredholm alternative for compact operators.
 -/
-theorem exists_seq {𝕜 X : Type*}
+private theorem exists_seq {𝕜 X : Type*}
     [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
     {S : End 𝕜 X} (hS_not_surj : ¬ (S : X → X).Surjective)
     (hS_anti : Topology.IsClosedEmbedding S)
