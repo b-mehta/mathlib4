@@ -21,7 +21,7 @@ The main result is the Fredholm alternative for compact operators.
 ## Main results
 
 * `antilipschitz_of_not_hasEigenvalue`: if `T` is a compact operator and `μ ≠ 0` is not an
-  eigenvalue, then `T - μI` is antilipschitz.
+  eigenvalue, then `T - μI` is antilipschitz, i.e. bounded below.
 * `hasEigenvalue_or_mem_resolventSet`: the Fredholm alternative for compact operators, which says
   that if `T` is a compact operator and `μ ≠ 0`, then either `μ` is an eigenvalue of `T`, or `μ`
   is in the resolvent set of `T`.
@@ -143,8 +143,8 @@ private theorem exists_seq {𝕜 X : Type*}
     have h₁ : IsClosed ((V (n + 1)).comap (V n).subtype : Set (V n)) := by
       simpa using (hV_closed (n + 1)).preimage_val
     have h₂ : ∃ x : V n, x ∉ (V (n + 1)).comap (V n).subtype := by
-      obtain ⟨x, hx⟩ : ∃ x : X, ∀ y, S y ≠ x := by simpa [Function.Surjective] using hS_not_surj
-      simpa [iterate_succ, V, (iterate_injective hS_anti.injective n).eq_iff] using by use x
+      simpa [iterate_succ, V, (iterate_injective hS_anti.injective n).eq_iff,
+        Function.Surjective] using hS_not_surj
     obtain ⟨⟨x, hx⟩, hxn, hxy⟩ := riesz_lemma_of_norm_lt hc hR h₁ h₂
     simp only [Submodule.mem_comap, Submodule.subtype_apply, AddSubgroupClass.coe_norm,
       AddSubgroupClass.coe_sub, Subtype.forall] at hxn hxy
@@ -154,7 +154,7 @@ private theorem exists_seq {𝕜 X : Type*}
   choose x hxv hxn hxn' hxy using x
   exact ⟨x, hxn, hxn', hxv, hxy⟩
 
-/-- The Fredholm alternative for compact operators: if `T` is a compact operator and `μ ≠ 0`,
+/-- The **Fredholm alternative** for compact operators: if `T` is a compact operator and `μ ≠ 0`,
 then either `μ` is an eigenvalue of `T`, or `μ` is in the resolvent set of `T`. -/
 theorem fredholm_alternative {𝕜 X : Type*}
     [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
@@ -164,7 +164,7 @@ theorem fredholm_alternative {𝕜 X : Type*}
   -- Suppose not, then `μ` is not an eigenvalue and is in the spectrum.
   by_contra!
   obtain ⟨h₁, h₂⟩ := this
-  -- Defining S := T - μ • 1, we have that S is antilipschitz and not surjective.
+  -- Defining S := T - μ • 1, we deduce that S is antilipschitz and not surjective.
   let S := T - μ • 1
   obtain ⟨K, -, hK : AntilipschitzWith K S⟩ := antilipschitz_of_not_hasEigenvalue hT hμ h₁
   replace h₂ : ¬ (S : X → X).Bijective := by
@@ -200,8 +200,7 @@ theorem fredholm_alternative {𝕜 X : Type*}
       apply Submodule.smul_mem _ _ (Submodule.add_mem _ _ _)
       · exact Submodule.sub_mem _ (hf_mem' hmn.le) (hf_mem' le_rfl)
       · exact Submodule.smul_mem _ μ (hf_mem hmn)
-    rw [← hu, norm_smul, mul_comm]
-    grw [← hf_far _ u this, one_mul]
+    grw [← hu, norm_smul, mul_comm, ← hf_far _ u this, one_mul]
   -- However the `f n` are contained in a compact set, so their image under the compact operator `T`
   -- must contain a cauchy subsequence, which is a contradiction.
   obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact (‖c‖ + 1)
