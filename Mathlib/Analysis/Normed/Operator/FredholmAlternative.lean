@@ -25,6 +25,8 @@ The main result is the Fredholm alternative for compact operators.
 * `hasEigenvalue_or_mem_resolventSet`: the Fredholm alternative for compact operators, which says
   that if `T` is a compact operator and `μ ≠ 0`, then either `μ` is an eigenvalue of `T`, or `μ`
   is in the resolvent set of `T`.
+* `hasEigenvalue_iff_mem_spectrum`: if `T` is a compact operator, then the nonzero eigenvalues of
+  `T` are exactly the nonzero points in the spectrum of `T`.
 
 We follow the proof given in Section 2 of
 https://terrytao.wordpress.com/2011/04/10/a-proof-of-the-fredholm-alternative/
@@ -212,16 +214,11 @@ theorem fredholm_alternative {𝕜 X : Type*}
   refine this.not_ge (hp ?_)
   simp [hψ.injective.eq_iff]
 
-theorem ContinuousLinearMap.isUnit_toLinearMap_iff [CompleteSpace X] {T : X →L[𝕜] X} :
-    IsUnit T ↔ IsUnit (T : End 𝕜 X) := by
-  rw [ContinuousLinearMap.isUnit_iff_bijective, Module.End.isUnit_iff]
-  rfl
-
 theorem ContinuousLinearMap.spectrum_eq [CompleteSpace X] :
     spectrum 𝕜 (T : X →L[𝕜] X) = spectrum 𝕜 (T : End 𝕜 X) := by
   ext μ
   rw [spectrum, resolventSet, Set.mem_compl_iff, Set.mem_setOf,
-    ContinuousLinearMap.isUnit_toLinearMap_iff]
+    ContinuousLinearMap.isUnit_iff_isUnit_toLinearMap]
   rfl
 
 /--
