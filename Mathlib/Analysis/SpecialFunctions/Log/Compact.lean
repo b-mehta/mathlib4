@@ -151,40 +151,40 @@ then either `μ` is an eigenvalue of `T`, or `μ` is in the resolvent set of `T`
 theorem fredholm_alternative {𝕜 X : Type*}
     [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
     [CompleteSpace X] {T : X →L[𝕜] X} (hT : IsCompactOperator T)
-    {μ : 𝕜} (hμ : μ ≠ 0) : HasEigenvalue (T : End 𝕜 X) μ ∨ μ ∈ resolventSet 𝕜 T := by
+    {μ : 𝕜} (hμ : μ ≠ 0) :
+    HasEigenvalue (T : End 𝕜 X) μ ∨ μ ∈ resolventSet 𝕜 T := by
   by_contra!
   obtain ⟨h₁, h₂⟩ := this
-  let (eq := hS) S := (T - μ • 1)
+  let S := T - μ • 1
+  obtain ⟨K, -, hK : AntilipschitzWith K S⟩ := antilipschitz_of_not_hasEigenvalue hT hμ h₁
   replace h₂ : ¬ (S : X → X).Bijective := by
     rw [spectrum.mem_resolventSet_iff, ← IsUnit.neg_iff,
       ContinuousLinearMap.isUnit_iff_bijective] at h₂
     convert h₂
     ext x
     simp [S]
-  obtain ⟨K, -, hK : AntilipschitzWith K S⟩ := antilipschitz_of_not_hasEigenvalue hT hμ h₁
+  replace h₂ : ¬ (S : X → X).Surjective := by grind [Function.Bijective, hK.injective]
   obtain ⟨c, hc⟩ := NormedField.exists_one_lt_norm 𝕜
-  obtain ⟨f, hf_norm_lower, hf_norm_upper, hf_mem, hf_far⟩ :=
-    exists_seq (mt (.intro hK.injective) h₂)
-    (hK.isClosedEmbedding S.uniformContinuous) (c := c) hc (R := ‖c‖ + 1) (by simp)
-  have hf_mem' (n : ℕ) : S (f n) ∈ ((S : End 𝕜 X) ^ (n + 1)).range := by
-    rw [iterate_succ']
-    rw [LinearMap.range_comp]
-    exact ⟨f n, hf_mem n, rfl⟩
+  obtain ⟨f, hf_norm_lower, hf_norm_upper, hf_mem, hf_far⟩ := exists_seq h₂
+    (hK.isClosedEmbedding S.uniformContinuous) hc (R := ‖c‖ + 1) (by simp)
+  replace hf_mem {n m : ℕ} (h : m ≤ n) : f n ∈ ((S : End 𝕜 X) ^ m).range :=
+    (S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem _)
+  have hf_mem' {n m : ℕ} (h : m ≤ n) : S (f n) ∈ ((S : End 𝕜 X) ^ (m + 1)).range := by
+    rw [iterate_succ', LinearMap.range_comp]
+    exact ⟨f n, hf_mem h, rfl⟩
   have hp : Pairwise fun x₁ x₂ ↦ ‖μ‖ ≤ ‖T (f x₁) - T (f x₂)‖ := by
+    apply Pairwise.of_lt
+    · grind [Symmetric, norm_sub_rev]
     intro m n hmn
-    wlog! hmn' : m < n generalizing m n
-    · rw [norm_sub_rev]
-      exact this hmn.symm (by order)
     let u : X := μ⁻¹ • (S (f n) - S (f m) + μ • f n)
-    have hu : μ • (f m - u) = (T (f m) - T (f n)) := by
+    have hu : μ • (f m - u) = T (f m) - T (f n) := by
       rw [smul_sub, smul_inv_smul₀ hμ]
       simp [S]
       linear_combination (norm := module)
     have : u ∈ ((S : End 𝕜 X) ^ (m + 1)).range := by
       apply Submodule.smul_mem _ _ (Submodule.add_mem _ _ _)
-      · exact Submodule.sub_mem _ ((S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem' _))
-          (hf_mem' _)
-      · exact Submodule.smul_mem _ μ ((S : End 𝕜 X).iterateRange.monotone (by lia) (hf_mem n))
+      · exact Submodule.sub_mem _ (hf_mem' hmn.le) (hf_mem' le_rfl)
+      · exact Submodule.smul_mem _ μ (hf_mem hmn)
     rw [← hu, norm_smul, mul_comm]
     grw [← hf_far _ u this, one_mul]
   obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact (‖c‖ + 1)
