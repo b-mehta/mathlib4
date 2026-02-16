@@ -90,7 +90,7 @@ theorem antilipschitz_of_not_hasEigenvalue (hT : IsCompactOperator T)
     have h₂ : ‖μ‖ * ‖x n‖ ≤ ‖T (x n)‖ + ‖T (x n) - μ • x n‖ := by
       simpa [norm_smul] using norm_le_norm_add_norm_sub (T (x n)) (μ • x n)
     linear_combination h₂ + h₁ + hn + ‖μ‖ * hx_norm_lower n
- -- The sequence yₙ is contained in the image of the closed unit ball under T, which is compact,
+  -- The sequence yₙ is contained in the image of the closed unit ball under T, which is compact,
   -- since T is, so we can extract a convergent subsequence, and say y_ (ψ n) → y.
   obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact 1
   obtain ⟨y, hyK, ψ, hψ, hψy⟩ := hK.tendsto_subseq (x := y_) (fun n ↦ hK' ⟨x n, by simp [*], rfl⟩)
@@ -204,7 +204,7 @@ theorem fredholm_alternative {𝕜 X : Type*}
       · exact Submodule.smul_mem _ μ (hf_mem hmn)
     grw [← hu, norm_smul, mul_comm, ← hf_far _ u this, one_mul]
   -- However the `f n` are contained in a compact set, so their image under the compact operator `T`
-  -- must contain a cauchy subsequence, which is a contradiction.
+  -- must contain a Cauchy subsequence, which is a contradiction.
   obtain ⟨K, hK, hK'⟩ := hT.image_closedBall_subset_compact (‖c‖ + 1)
   obtain ⟨y, hyK, ψ, hψ, hψy⟩ := hK.tendsto_subseq (fun n ↦ hK' ⟨f n, by simp [*], rfl⟩)
   replace hψy := hψy.cauchySeq
