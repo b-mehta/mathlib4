@@ -193,7 +193,7 @@ protected theorem subsingleton {α β} [EMetricSpace α] [PseudoEMetricSpace β]
     (h : AntilipschitzWith 0 f) : Subsingleton α :=
   ⟨fun x y => edist_le_zero.1 <| (h x y).trans_eq <| zero_mul _⟩
 
-/-- If `f : α → β` is `K`-antilipschitz and `a` is nontrivial, `K` is positive. -/
+/-- If `f : α → β` is `K`-antilipschitz and `α` is nontrivial, `K` is positive. -/
 protected theorem pos {α} [EMetricSpace α] [Nontrivial α] {f : α → β}
     (hf : AntilipschitzWith K f) : 0 < K := by
   by_contra! h₀
