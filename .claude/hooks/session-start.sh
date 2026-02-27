@@ -6,6 +6,11 @@
 
 log() { echo "[session-start] $*"; }
 
+# The hook may run as root, but Claude Code runs as the "claude" user.
+# Resolve the correct home directory for installing user-level files.
+CLAUDE_HOME="$(eval echo ~claude 2>/dev/null)"
+[ -d "$CLAUDE_HOME" ] || CLAUDE_HOME="$HOME"
+
 # --- gh (GitHub CLI) ---
 if ! command -v gh &>/dev/null; then
   log "Installing gh..."
@@ -17,7 +22,7 @@ if ! command -v gh &>/dev/null; then
 fi
 
 # --- lean4-skills plugin ---
-PLUGIN_DIR="$HOME/.claude/plugins/cache/lean4-skills"
+PLUGIN_DIR="$CLAUDE_HOME/.claude/plugins/cache/lean4-skills"
 if [ ! -d "$PLUGIN_DIR" ]; then
   log "Installing lean4-skills plugin..."
   tmp="$(mktemp -d)"
@@ -25,8 +30,9 @@ if [ ! -d "$PLUGIN_DIR" ]; then
   mkdir -p "$PLUGIN_DIR"
   cp -r "$tmp/repo/." "$PLUGIN_DIR/"
   # Copy skills to personal skills directory as a fallback
+  mkdir -p "$CLAUDE_HOME/.claude/skills"
   for d in "$tmp/repo/plugins/lean4/skills" "$tmp/repo/skills"; do
-    [ -d "$d" ] && cp -r "$d/"* "$HOME/.claude/skills/" 2>/dev/null || true
+    [ -d "$d" ] && cp -r "$d/"* "$CLAUDE_HOME/.claude/skills/" 2>/dev/null || true
   done
   rm -rf "$tmp"
 fi
