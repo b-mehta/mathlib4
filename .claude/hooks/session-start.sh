@@ -15,6 +15,7 @@ fi
 #   1. GitHub CLI (gh)
 #   2. lean4-skills Claude Code plugin (cameronfreer/lean4-skills)
 #   3. elan + lake (Lean 4 toolchain manager and build system)
+#   4. ripgrep (rg) and eza
 ###############################################################################
 
 # --------------------------------------------------------------------------- #
@@ -105,6 +106,27 @@ if command -v lake &>/dev/null; then
   echo "[session-start] lake available: $(lake --version 2>/dev/null || echo 'version unknown')"
 else
   echo "[session-start] Warning: lake not found in PATH after elan install"
+fi
+
+# --------------------------------------------------------------------------- #
+# 4. Install ripgrep (rg) and eza
+# --------------------------------------------------------------------------- #
+APT_TOOLS_TO_INSTALL=()
+if ! command -v rg &>/dev/null; then
+  APT_TOOLS_TO_INSTALL+=(ripgrep)
+fi
+if ! command -v eza &>/dev/null; then
+  APT_TOOLS_TO_INSTALL+=(eza)
+fi
+
+if [ ${#APT_TOOLS_TO_INSTALL[@]} -gt 0 ]; then
+  echo "[session-start] Installing ${APT_TOOLS_TO_INSTALL[*]}..."
+  sudo apt-get update -qq
+  sudo apt-get install -y -qq "${APT_TOOLS_TO_INSTALL[@]}"
+  command -v rg &>/dev/null && echo "[session-start] ripgrep installed: $(rg --version | head -1)"
+  command -v eza &>/dev/null && echo "[session-start] eza installed: $(eza --version | head -1)"
+else
+  echo "[session-start] ripgrep and eza already installed"
 fi
 
 echo "[session-start] Environment setup complete."
