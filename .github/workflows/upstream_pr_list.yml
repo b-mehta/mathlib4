@@ -1,0 +1,32 @@
+name: Upstream PR List
+
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'ISO 8601 datetime cutoff for PRs (e.g. 2026-03-02T09:00:00Z)'
+        required: false
+        default: '2026-03-02T09:00:00Z'
+
+permissions:
+  contents: read
+
+jobs:
+  generate-pr-list:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run upstream PR list script
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/upstream_pr_list.py --since "${{ github.event.inputs.since }}" \
+            > upstream_prs.jsonl
+
+      - name: Upload PR list artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: upstream-pr-list
+          path: upstream_prs.jsonl
