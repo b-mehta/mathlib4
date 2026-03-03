@@ -3,12 +3,18 @@
 Track mathlib4 PRs involving workshop attendees.
 
 Uses the GitHub REST API via curl to find PRs created or commented on
-by workshop attendees during a given date range.
+by workshop attendees during a given date range. Categorizes PRs into:
+- Created AND merged during the workshop
+- Created during the workshop (not yet merged)
+- Merged during the workshop (created before)
+- Reviewed during the workshop (pre-existing PRs)
 
 Usage:
     python3 workshop_pr_tracker.py [--start YYYY-MM-DD] [--end YYYY-MM-DD] [--token GITHUB_TOKEN]
 
 Defaults to March 2-6, 2026 (Bonn workshop week).
+A GitHub token is strongly recommended to avoid rate limits (60 req/hr unauthenticated
+vs 5000 req/hr authenticated). Create one at https://github.com/settings/tokens
 """
 
 import argparse
@@ -52,11 +58,12 @@ def github_api(endpoint, token=None, params=None):
     cmd.extend(["-H", "Accept: application/vnd.github.v3+json", url])
 
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    if not r.stdout.strip():
+        return None
     data = json.loads(r.stdout)
 
-    # Check for rate limiting
     if isinstance(data, dict) and "message" in data and "rate limit" in data.get("message", "").lower():
-        return None  # signal rate limit
+        return None
     return data
 
 
@@ -71,7 +78,6 @@ def github_api_paginated(endpoint, token=None, params=None, max_pages=20, stop_b
         data = github_api(endpoint, token, base_params)
 
         if data is None:
-            # Rate limited — wait and retry once
             print(f"  Rate limited on page {page}, waiting 60s...", file=sys.stderr)
             time.sleep(60)
             data = github_api(endpoint, token, base_params)
@@ -84,19 +90,20 @@ def github_api_paginated(endpoint, token=None, params=None, max_pages=20, stop_b
 
         all_results.extend(data)
 
-        # Check if we've gone past our date window
         if stop_before:
             last_date = data[-1].get("created_at", "")
             if last_date < stop_before:
                 break
 
         print(f"  Page {page}: {len(data)} items", file=sys.stderr)
-        time.sleep(1)  # be nice to API
+        time.sleep(1)
 
     return all_results
 
 
 def parse_date(s):
+    if not s:
+        return None
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
@@ -105,11 +112,22 @@ def pr_number_from_url(url):
     return int(m.group(1)) if m else None
 
 
-def fetch_pr_title(pr_num, token=None):
-    """Fetch the title for a single PR."""
+def clean_title(t):
+    return re.sub(r'^\[Merged by Bors\]\s*-\s*', '', t)
+
+
+def fetch_pr_detail(pr_num, token=None):
+    """Fetch full detail for a single PR (title, state, dates)."""
     data = github_api(f"repos/{REPO}/pulls/{pr_num}", token)
     if data and isinstance(data, dict) and "title" in data:
-        return re.sub(r'^\[Merged by Bors\]\s*-\s*', '', data["title"])
+        return {
+            "title": clean_title(data["title"]),
+            "raw_title": data["title"],
+            "author": data["user"]["login"],
+            "state": data["state"],
+            "created_at": data.get("created_at"),
+            "closed_at": data.get("closed_at"),
+        }
     return None
 
 
@@ -126,7 +144,6 @@ def main():
     token = args.token or None
     start_dt = datetime.fromisoformat(f"{args.start}T00:00:00+00:00")
     end_dt = datetime.fromisoformat(f"{args.end}T23:59:59+00:00")
-    # For API queries, use the day before start as stop_before
     stop_before = (start_dt - timedelta(days=1)).strftime("%Y-%m-%d")
 
     print(f"Fetching data for {args.start} to {args.end}...", file=sys.stderr)
@@ -150,18 +167,34 @@ def main():
     )
     print(f"  Total: {len(comments)} comments", file=sys.stderr)
 
-    # 3. Build PR info from created PRs
-    pr_info = {}
+    # 3. Build PR detail from list endpoint
+    # In mathlib, bors closes PRs on merge and prepends "[Merged by Bors] - " to the title.
+    # The GitHub API merged_at field is NOT set because bors doesn't use GitHub's merge button.
+    # So we use: title starts with "[Merged by Bors]" + state=closed => merged.
+    # The closed_at field gives the merge timestamp.
+    pr_detail = {}
     for pr in created_prs:
-        title = re.sub(r'^\[Merged by Bors\]\s*-\s*', '', pr["title"])
-        pr_info[pr["number"]] = {"title": title, "author": pr["user"]["login"]}
+        created_at = parse_date(pr["created_at"])
+        closed_at = parse_date(pr.get("closed_at"))
+        is_merged = "[Merged by Bors]" in pr["title"]
+        pr_detail[pr["number"]] = {
+            "title": clean_title(pr["title"]),
+            "raw_title": pr["title"],
+            "author": pr["user"]["login"],
+            "state": pr["state"],
+            "created_at": created_at,
+            "closed_at": closed_at,
+            "is_merged": is_merged,
+            "created_during": created_at and start_dt <= created_at <= end_dt,
+            "merged_during": is_merged and closed_at and start_dt <= closed_at <= end_dt,
+        }
 
     # 4. Build activity maps
     people = defaultdict(lambda: {"authored": set(), "commented": set()})
 
     for pr in created_prs:
         created_at = parse_date(pr["created_at"])
-        if created_at < start_dt or created_at > end_dt:
+        if not created_at or created_at < start_dt or created_at > end_dt:
             continue
         author = pr["user"]["login"]
         if author not in BOT_USERS and not author.endswith("[bot]"):
@@ -169,7 +202,7 @@ def main():
 
     for comment in comments:
         created_at = parse_date(comment["created_at"])
-        if created_at < start_dt or created_at > end_dt:
+        if not created_at or created_at < start_dt or created_at > end_dt:
             continue
         user = comment["user"]["login"]
         if user in BOT_USERS or user.endswith("[bot]"):
@@ -186,23 +219,40 @@ def main():
             workshop_prs.update(people[user]["authored"])
             workshop_prs.update(people[user]["commented"])
 
-    # 6. Fetch missing titles
-    missing = [n for n in sorted(workshop_prs) if n not in pr_info]
+    # 6. Fetch details for PRs only found via comments (not in the list endpoint)
+    missing = sorted([n for n in workshop_prs if n not in pr_detail])
     if missing:
-        print(f"Fetching titles for {len(missing)} PRs...", file=sys.stderr)
+        print(f"Fetching details for {len(missing)} PRs found via comments...", file=sys.stderr)
         for i, pr_num in enumerate(missing):
-            title = fetch_pr_title(pr_num, token)
-            if title:
-                pr_info[pr_num] = {"title": title, "author": "unknown"}
+            detail = fetch_pr_detail(pr_num, token)
+            if detail:
+                created_at = parse_date(detail["created_at"])
+                closed_at = parse_date(detail.get("closed_at"))
+                is_merged = "[Merged by Bors]" in detail["raw_title"]
+                pr_detail[pr_num] = {
+                    **detail,
+                    "created_at": created_at,
+                    "closed_at": closed_at,
+                    "is_merged": is_merged,
+                    "created_during": created_at and start_dt <= created_at <= end_dt,
+                    "merged_during": is_merged and closed_at and start_dt <= closed_at <= end_dt,
+                }
             else:
-                pr_info[pr_num] = {"title": "(title unavailable)", "author": "unknown"}
+                pr_detail[pr_num] = {
+                    "title": "(details unavailable)",
+                    "author": "unknown",
+                    "state": "unknown",
+                    "is_merged": False,
+                    "created_during": False,
+                    "merged_during": False,
+                }
             if (i + 1) % 10 == 0:
                 print(f"  {i + 1}/{len(missing)} done", file=sys.stderr)
             time.sleep(0.5)
 
-    # 7. Output table
-    def get_title(pr_num):
-        return pr_info.get(pr_num, {}).get("title", "(unknown)")
+    # 7. Categorize and output
+    def get_title(n):
+        return pr_detail.get(n, {}).get("title", "(unknown)")
 
     def get_involvement(pr_num):
         involved = []
@@ -218,26 +268,68 @@ def main():
                 involved.append(f"{user} ({', '.join(roles)})")
         return involved
 
+    def categorize(n):
+        d = pr_detail.get(n, {})
+        created = d.get("created_during", False)
+        merged = d.get("merged_during", False)
+        if created and merged:
+            return "created+merged"
+        elif created:
+            return "created"
+        elif merged:
+            return "merged"
+        else:
+            return "reviewed"
+
+    categories = {
+        "created+merged": [],
+        "created": [],
+        "merged": [],
+        "reviewed": [],
+    }
+    for n in sorted(workshop_prs, reverse=True):
+        categories[categorize(n)].append(n)
+
+    REPO_URL = f"https://github.com/{REPO}/pull"
+
     if args.format == "markdown":
         print(f"# Workshop PR Activity: {args.start} to {args.end}\n")
-        print(f"**{len(workshop_prs)} PRs** involving **{len(WORKSHOP_ATTENDEES)} attendees**\n")
-        print("| # | Title | Workshop involvement |")
-        print("|---|-------|---------------------|")
-        for pr_num in sorted(workshop_prs, reverse=True):
-            title = get_title(pr_num).replace("|", "\\|")
-            link = f"[#{pr_num}](https://github.com/{REPO}/pull/{pr_num})"
-            involved = ", ".join(get_involvement(pr_num))
-            print(f"| {link} | {title} | {involved} |")
-    else:
-        print("PR,Title,Workshop Involvement")
-        for pr_num in sorted(workshop_prs, reverse=True):
-            title = get_title(pr_num).replace('"', '""')
-            involved = "; ".join(get_involvement(pr_num))
-            print(f'{pr_num},"{title}","{involved}"')
+        print(f"**{len(workshop_prs)} PRs** touched by **{len(WORKSHOP_ATTENDEES)} attendees**\n")
 
-    # Summary
+        section_headers = {
+            "created+merged": "Created AND merged during the workshop",
+            "created": "Created during the workshop (not yet merged)",
+            "merged": "Merged during the workshop (created before)",
+            "reviewed": "Reviewed during the workshop (pre-existing PRs)",
+        }
+        for cat_key in ["created+merged", "created", "merged", "reviewed"]:
+            prs = categories[cat_key]
+            if not prs:
+                continue
+            print(f"\n### {section_headers[cat_key]} ({len(prs)} PRs)\n")
+            print("| # | Title | Workshop involvement |")
+            print("|---|-------|---------------------|")
+            for n in prs:
+                title = get_title(n).replace("|", "\\|")
+                link = f"[#{n}]({REPO_URL}/{n})"
+                involved = ", ".join(get_involvement(n))
+                print(f"| {link} | {title} | {involved} |")
+    else:
+        print("Category,PR,Title,Workshop Involvement")
+        for cat_key in ["created+merged", "created", "merged", "reviewed"]:
+            for n in categories[cat_key]:
+                title = get_title(n).replace('"', '""')
+                involved = "; ".join(get_involvement(n))
+                print(f'{cat_key},{n},"{title}","{involved}"')
+
+    # Summary to stderr
     print(f"\n---", file=sys.stderr)
-    print(f"Attendee summary:", file=sys.stderr)
+    print(f"Summary:", file=sys.stderr)
+    for cat_key, label in [("created+merged", "Created+merged"), ("created", "Created (open)"),
+                            ("merged", "Merged (pre-existing)"), ("reviewed", "Reviewed")]:
+        print(f"  {label}: {len(categories[cat_key])} PRs", file=sys.stderr)
+    print(f"  Total: {len(workshop_prs)} PRs", file=sys.stderr)
+    print(f"\nAttendee activity:", file=sys.stderr)
     attendee_data = []
     for user in WORKSHOP_ATTENDEES:
         a = len(people[user]["authored"]) if user in people else 0
