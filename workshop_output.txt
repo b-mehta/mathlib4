@@ -1,0 +1,1269 @@
+
+================================================================================
+MATHLIB4 WORKSHOP ACTIVITY: 2026-03-02 to 2026-03-03
+================================================================================
+
+================================================================================
+PEOPLE SUMMARY (sorted by activity)
+================================================================================
+GitHub Username                PRs Authored    PRs Commented   Total   
+------------------------------ --------------- --------------- --------
+riccardobrasca                 0               33              33      
+joelriou                       8               22              30      
+SproutSeeds                    13              10              23      
+grunweg                        11              8               19      
+chrisflav                      5               9               14      
+EtienneC30                     10              3               13      
+mattrobball                    0               9               9       
+ocfnash                        0               9               9       
+kim-em                         5               3               8       
+bryangingechen                 1               7               8       
+sgouezel                       4               4               8       
+tb65536                        5               3               8       
+vihdzp                         1               6               7       
+b-mehta                        1               6               7       
+kbuzzard                       0               7               7       
+smorel394                      3               3               6       
+RemyDegenne                    2               3               5       
+JovanGerb                      0               5               5       
+faenuccio                      0               5               5       
+kckennylau                     0               5               5       
+mcdoll                         3               1               4       
+euprunin                       4               0               4       
+justus-springer                3               1               4       
+xgenereux                      2               2               4       
+Whysoserioushah                3               1               4       
+harahu                         2               2               4       
+Parcly-Taxel                   1               2               3       
+erdOne                         1               2               3       
+adrianmartir                   1               2               3       
+smmercuri                      2               1               3       
+urkud                          2               1               3       
+themathqueen                   2               1               3       
+kebekus                        2               1               3       
+fpvandoorn                     0               3               3       
+adomani                        0               3               3       
+j-loreaux                      0               3               3       
+MichaelStollBayreuth           0               3               3       
+Scarlett-le                    2               0               2       
+Ruben-VandeVelde               1               1               2       
+emmanuel-ferdman               1               1               2       
+gasparattila                   2               0               2       
+wwylele                        1               1               2       
+huaizhangchu                   1               1               2       
+marcelolynch                   1               1               2       
+alexjbest                      0               2               2       
+YaelDillies                    0               2               2       
+Vierkantor                     0               2               2       
+PatrickMassot                  0               2               2       
+SnirBroshi                     0               2               2       
+mariainesdff                   0               2               2       
+parabamoghv                    1               0               1       
+BoltonBailey                   1               0               1       
+b-reinke                       1               0               1       
+Phelixh                        1               0               1       
+jessealama                     1               0               1       
+xroblot                        1               0               1       
+homeowmorphism                 1               0               1       
+matthewjasper                  1               0               1       
+eliasjudin                     1               0               1       
+pfaffelh                       1               0               1       
+stepan2698-cpu                 1               0               1       
+mekhledakkad-hash              1               0               1       
+robin-carlier                  1               0               1       
+LLaurance                      1               0               1       
+edegeltje                      1               0               1       
+Equilibris                     1               0               1       
+A-M-Berns                      0               1               1       
+yonggyuchoimath                0               1               1       
+astrainfinita                  0               1               1       
+AntoineChambert-Loir           0               1               1       
+dhyan-aranha                   0               1               1       
+plp127                         0               1               1       
+Brian-Nugent                   0               1               1       
+thorimur                       0               1               1       
+loefflerd                      0               1               1       
+maksym-radziwill               0               1               1       
+emilyriehl                     0               1               1       
+mpenciak                       0               1               1       
+WenrongZou                     0               1               1       
+MJ141592                       0               1               1       
+sqrt-of-2                      0               1               1       
+
+================================================================================
+ALL PRs WITH ACTIVITY DURING WORKSHOP
+================================================================================
+
+#36070: chore(CategoryTheory/Sites): golf sheaf isomorphisms using `FullyFaithful.preimageIso`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36070
+  Author: chrisflav
+  Workshop involvement: chrisflav (author)
+
+#36069: feat(Data/PFunctor): Universe generic W
+  URL: https://github.com/leanprover-community/mathlib4/pull/36069
+  Author: Equilibris
+  Workshop involvement: Equilibris (author)
+
+#36068: feat(RingTheory/Polynomial/GaussLemma): `mem_lifts` lemma for primitive polynomials
+  URL: https://github.com/leanprover-community/mathlib4/pull/36068
+  Author: justus-springer
+  Workshop involvement: justus-springer (author)
+
+#36067: feat(NumberTheory/NumberField/FinitePlaces): `Module.Finite (v.adicCompletion K) (w.adicCompletion L)`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36067
+  Author: smmercuri
+  Workshop involvement: smmercuri (author)
+
+#36066: feat: independence of processes with almost everywhere equal marginals
+  URL: https://github.com/leanprover-community/mathlib4/pull/36066
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36065: feat: countable intersections/unions of ae eq sets are ae eq
+  URL: https://github.com/leanprover-community/mathlib4/pull/36065
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36064: ci: Push to the cache using OIDC and federated credentials
+  URL: https://github.com/leanprover-community/mathlib4/pull/36064
+  Author: marcelolynch
+  Workshop involvement: marcelolynch (author)
+
+#36063: feat(SimpleGraph/Connectivity): add vertex reachability and connectivity numbers
+  URL: https://github.com/leanprover-community/mathlib4/pull/36063
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36062: feat(Probability/PMF): add PMF.integrable_of_summable_norm
+  URL: https://github.com/leanprover-community/mathlib4/pull/36062
+  Author: huaizhangchu
+  Workshop involvement: huaizhangchu (author)
+
+#36061: [Merged by Bors] - feat(CategoryTheory/Sites): topology on `Over X` is subcanonical if the topology on the base is subcanonical
+  URL: https://github.com/leanprover-community/mathlib4/pull/36061
+  Author: chrisflav
+  Workshop involvement: chrisflav (author); joelriou (commenter)
+
+#36060: chore(CategoryTheory/Classifier): namespace Classifier, rename HasClassifier, move file
+  URL: https://github.com/leanprover-community/mathlib4/pull/36060
+  Author: edegeltje
+  Workshop involvement: edegeltje (author)
+
+#36059: feat(CategoryTheory/Functor): exactness properties of conservative families of exact functors
+  URL: https://github.com/leanprover-community/mathlib4/pull/36059
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#36058: feat: more versions of the characteristic function of a sum
+  URL: https://github.com/leanprover-community/mathlib4/pull/36058
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36057: [Merged by Bors] - feat(Topology/Sheaves/Presheaf): pullback of a presheaf by an open map
+  URL: https://github.com/leanprover-community/mathlib4/pull/36057
+  Author: smorel394
+  Workshop involvement: smorel394 (author, commenter); mattrobball (commenter)
+
+#36056: chore: rename ordered-cancel add monoid counterexample file
+  URL: https://github.com/leanprover-community/mathlib4/pull/36056
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36055: chore: rename rpow monotonicity lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/36055
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36054: chore(Algebra): shorten proofs, style
+  URL: https://github.com/leanprover-community/mathlib4/pull/36054
+  Author: LLaurance
+  Workshop involvement: LLaurance (author)
+
+#36053: feat(SimpleGraph/Matching): add graph-level IsMatching predicate
+  URL: https://github.com/leanprover-community/mathlib4/pull/36053
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36052: feat(Algebra/Homology): bounded below cochain complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/36052
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#36051: chore: golf using `grind`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36051
+  Author: euprunin
+  Workshop involvement: euprunin (author)
+
+#36050: feat(Combinatorics/SimpleGraph/Connectivity): add edge reachability and connectivity numbers
+  URL: https://github.com/leanprover-community/mathlib4/pull/36050
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36049: feat: generalize Liouville's theorem for harmonic functions
+  URL: https://github.com/leanprover-community/mathlib4/pull/36049
+  Author: kebekus
+  Workshop involvement: kebekus (author); fpvandoorn (commenter)
+
+#36048: feat(Tactic/DefEqAbuse): disambiguate identical-sides isDefEq failures
+  URL: https://github.com/leanprover-community/mathlib4/pull/36048
+  Author: kim-em
+  Workshop involvement: kim-em (author)
+
+#36047: [Merged by Bors] - chore(RepresentationTheory/Intertwining): Generalise and add lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/36047
+  Author: Whysoserioushah
+  Workshop involvement: Whysoserioushah (author); kbuzzard (commenter); riccardobrasca (commenter)
+
+#36046: [Merged by Bors] - refactor(Topology/Category/TopCat/Opens): split off part of `IsOpenMap.functor`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36046
+  Author: smorel394
+  Workshop involvement: joelriou (commenter); smorel394 (author)
+
+#36045: [WIP]refactor(RepresentationTheory/Rep): refactor the definition of rep
+  URL: https://github.com/leanprover-community/mathlib4/pull/36045
+  Author: Whysoserioushah
+  Workshop involvement: Whysoserioushah (author)
+
+#36044: [Merged by Bors] - chore(RingTheory): reorganize imports around locality properties of finiteness
+  URL: https://github.com/leanprover-community/mathlib4/pull/36044
+  Author: chrisflav
+  Workshop involvement: chrisflav (author, commenter); riccardobrasca (commenter)
+
+#36043: feat: add `dsimp%` elaborator
+  URL: https://github.com/leanprover-community/mathlib4/pull/36043
+  Author: robin-carlier
+  Workshop involvement: robin-carlier (author)
+
+#36042: feat(SimpleGraph/VertexCover): add minimal/minimum cover defs
+  URL: https://github.com/leanprover-community/mathlib4/pull/36042
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36041: feat(SimpleGraph/Matching): add maximal and maximum matching defs
+  URL: https://github.com/leanprover-community/mathlib4/pull/36041
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36040: feat: better error message in T% elaborator
+  URL: https://github.com/leanprover-community/mathlib4/pull/36040
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36039: [Merged by Bors] - feat: variance of a sum with respect to the product measure
+  URL: https://github.com/leanprover-community/mathlib4/pull/36039
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36038: feat: variance of a sum wrt a product measure
+  URL: https://github.com/leanprover-community/mathlib4/pull/36038
+  Author: RemyDegenne
+  Workshop involvement: RemyDegenne (author)
+
+#36037: feat: inner product in `ℝ`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36037
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36036: Hm covder bundled
+  URL: https://github.com/leanprover-community/mathlib4/pull/36036
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36035: [Merged by Bors] - feat: taylor expansion within `univ`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36035
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36034: [Merged by Bors] - chore: add missing fast_instance on instances on the subtype of nonnegative elements
+  URL: https://github.com/leanprover-community/mathlib4/pull/36034
+  Author: sgouezel
+  Workshop involvement: sgouezel (author); grunweg (commenter); kbuzzard (commenter); Vierkantor (commenter)
+
+#36033: feat: formalize RH stability and prime gap quantization via dual-current mechanics
+  URL: https://github.com/leanprover-community/mathlib4/pull/36033
+  Author: mekhledakkad-hash
+  Workshop involvement: vihdzp (commenter); mekhledakkad-hash (author)
+
+#36032: feat(Algebra/Homology/SpectralObject): differentials on pages
+  URL: https://github.com/leanprover-community/mathlib4/pull/36032
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#36031: feat: linter to make sure defs are `implicit_reducible` if they output classes
+  URL: https://github.com/leanprover-community/mathlib4/pull/36031
+  Author: sgouezel
+  Workshop involvement: sgouezel (author)
+
+#36030: feat(Algebra/Homology): more API for `SpectralObject.E`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36030
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#36029: feat(Algebra/Homology): exact sequences for `SpectralObject.E`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36029
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#36028: [Merged by Bors] - feat: iterated Fréchet derivative of a composition with scalar multiplication
+  URL: https://github.com/leanprover-community/mathlib4/pull/36028
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36027: [Merged by Bors] - feat: monotonicity of norm integrability
+  URL: https://github.com/leanprover-community/mathlib4/pull/36027
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36026: [Merged by Bors] - chore: rename theorems to comply with mathlib standards
+  URL: https://github.com/leanprover-community/mathlib4/pull/36026
+  Author: kebekus
+  Workshop involvement: grunweg (commenter); kebekus (author)
+
+#36025: feat: taylor expansion of the characteristic function
+  URL: https://github.com/leanprover-community/mathlib4/pull/36025
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#36024: chore: golf proofs
+  URL: https://github.com/leanprover-community/mathlib4/pull/36024
+  Author: euprunin
+  Workshop involvement: euprunin (author)
+
+#36023: feat(SimpleGraph): add maximal clique/indep-set defs and use MaximalFor
+  URL: https://github.com/leanprover-community/mathlib4/pull/36023
+  Author: SproutSeeds
+  Workshop involvement: b-mehta (commenter); SproutSeeds (author, commenter)
+
+#36022: feat(SimpleGraph): redefine `IsBridge` via `deleteEdges`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36022
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author, commenter)
+
+#36021: [Merged by Bors] - chore: remove `set_option backward.isDefEq.respectTransparency false`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36021
+  Author: kim-em
+  Workshop involvement: kim-em (author); adomani (commenter)
+
+#36020: feat(Combinatorics/Enumerative/DoubleCounting): add weighted bipartite lower bound
+  URL: https://github.com/leanprover-community/mathlib4/pull/36020
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36019: chore: update undergrad.yaml
+  URL: https://github.com/leanprover-community/mathlib4/pull/36019
+  Author: stepan2698-cpu
+  Workshop involvement: stepan2698-cpu (author)
+
+#36018: feat(LinearAlgebra/AffineSpace): shifting a subspace towards a point
+  URL: https://github.com/leanprover-community/mathlib4/pull/36018
+  Author: wwylele
+  Workshop involvement: wwylele (author)
+
+#36017: feat(Algebra/Order/BigOperators/Group/Finset): add sum_mul_le_sum_sum_filter_of_le_card_filter
+  URL: https://github.com/leanprover-community/mathlib4/pull/36017
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author)
+
+#36016: chore(scripts): add analyze_defeq_abuse.py and gist updater
+  URL: https://github.com/leanprover-community/mathlib4/pull/36016
+  Author: kim-em
+  Workshop involvement: kim-em (author)
+
+#36015: chore(Analysis/SchwartzMap): unify style for `mkCLM` uses
+  URL: https://github.com/leanprover-community/mathlib4/pull/36015
+  Author: mcdoll
+  Workshop involvement: mcdoll (author)
+
+#36014: chore: golf proofs
+  URL: https://github.com/leanprover-community/mathlib4/pull/36014
+  Author: euprunin
+  Workshop involvement: euprunin (author)
+
+#36013: feat(Topology/Compactness/CompactSystem): introduce compact Systems
+  URL: https://github.com/leanprover-community/mathlib4/pull/36013
+  Author: pfaffelh
+  Workshop involvement: pfaffelh (author)
+
+#36012: chore(Geometry/Manifold/VectorField/Pullback): golf using custom elab…
+  URL: https://github.com/leanprover-community/mathlib4/pull/36012
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36011: chore(Geometry/Manifold/VectorBundle/MDifferentiable): golf using cus…
+  URL: https://github.com/leanprover-community/mathlib4/pull/36011
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36010: chore(Geometry/Manifold/MFDeriv): golf using custom elaborators
+  URL: https://github.com/leanprover-community/mathlib4/pull/36010
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36009: chore(Geometry/Manifold/MFDeriv/SpecificFunctions): golf using custom…
+  URL: https://github.com/leanprover-community/mathlib4/pull/36009
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36008: chore(Geometry/Manifold/ContMDiffMFDeriv): golf using custom elaborators
+  URL: https://github.com/leanprover-community/mathlib4/pull/36008
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36007: chore(Geometry/Manifold/Algebra): golf using custom elaborators
+  URL: https://github.com/leanprover-community/mathlib4/pull/36007
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#36006: feat(LinearAlgebra): dimension of `P →ᵃ[R] W`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36006
+  Author: gasparattila
+  Workshop involvement: gasparattila (author)
+
+#36005: feat: add Finset.prod_le_pow_card_mul_prod
+  URL: https://github.com/leanprover-community/mathlib4/pull/36005
+  Author: SproutSeeds
+  Workshop involvement: SproutSeeds (author, commenter)
+
+#36004: [Merged by Bors] - feat(CategoryTheory/Limits/Preserves/FunctorCategory): add `ReflectsLimitsOfShape` instance for `whiskeringRight`
+  URL: https://github.com/leanprover-community/mathlib4/pull/36004
+  Author: tb65536
+  Workshop involvement: joelriou (commenter); tb65536 (author)
+
+#36003: feat: add Finset.card_nsmul_le_sum_of_subset
+  URL: https://github.com/leanprover-community/mathlib4/pull/36003
+  Author: SproutSeeds
+  Workshop involvement: b-mehta (commenter); SproutSeeds (author, commenter)
+
+#36002: feat(CategoryTheory/Monoidal/Grp_): a monoid object with invertible homs is a group object
+  URL: https://github.com/leanprover-community/mathlib4/pull/36002
+  Author: tb65536
+  Workshop involvement: tb65536 (author, commenter)
+
+#36001: fix(docs): deduplicate yaml key
+  URL: https://github.com/leanprover-community/mathlib4/pull/36001
+  Author: harahu
+  Workshop involvement: harahu (author, commenter)
+
+#36000: add reindexing, fibers pseudofunctor, internal categories, and single-morphism descent
+  URL: https://github.com/leanprover-community/mathlib4/pull/36000
+  Author: eliasjudin
+  Workshop involvement: eliasjudin (author)
+
+#35999: [Merged by Bors] - fix(scripts): fix a link to radar
+  URL: https://github.com/leanprover-community/mathlib4/pull/35999
+  Author: harahu
+  Workshop involvement: bryangingechen (commenter); harahu (author)
+
+#35998: feat: affine isomorphisms between spaces of affine maps
+  URL: https://github.com/leanprover-community/mathlib4/pull/35998
+  Author: gasparattila
+  Workshop involvement: gasparattila (author)
+
+#35997: feat(Analysis/CStarAlgebra/CFC/Order): conjugating with a star projection in a C*-algebra
+  URL: https://github.com/leanprover-community/mathlib4/pull/35997
+  Author: themathqueen
+  Workshop involvement: themathqueen (author)
+
+#35996: [Merged by Bors] - feat(CategoryTheory/Monoidal/Limits): generalise universes and explicit limits for limits of monoid objects
+  URL: https://github.com/leanprover-community/mathlib4/pull/35996
+  Author: b-mehta
+  Workshop involvement: chrisflav (commenter); b-mehta (author, commenter); kbuzzard (commenter); riccardobrasca (commenter)
+
+#35995: [Merged by Bors] - chore: Make {Preorder,PartialOrder}.mk abbrevs
+  URL: https://github.com/leanprover-community/mathlib4/pull/35995
+  Author: matthewjasper
+  Workshop involvement: sgouezel (commenter); matthewjasper (author)
+
+#35994: feat(FreeGroup): add reindexing lemmas for injective/surjective/bijective maps composed with freeGroupCongr
+  URL: https://github.com/leanprover-community/mathlib4/pull/35994
+  Author: homeowmorphism
+  Workshop involvement: homeowmorphism (author)
+
+#35993: chore: fix typo and add to simp
+  URL: https://github.com/leanprover-community/mathlib4/pull/35993
+  Author: xgenereux
+  Workshop involvement: xgenereux (author)
+
+#35992: [Merged by Bors] - feat(Analysis/CStarAlgebra/Basic): `‖e‖ ≤ 1` for star projections
+  URL: https://github.com/leanprover-community/mathlib4/pull/35992
+  Author: themathqueen
+  Workshop involvement: themathqueen (author); ocfnash (commenter)
+
+#35991: feat(RamificationInertia): various results about decomposition field and inertia field
+  URL: https://github.com/leanprover-community/mathlib4/pull/35991
+  Author: xroblot
+  Workshop involvement: xroblot (author)
+
+#35990: [Merged by Bors] - fix: `linarith` `splitNe` skips hypotheses without `LinearOrder`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35990
+  Author: emmanuel-ferdman
+  Workshop involvement: grunweg (commenter); emmanuel-ferdman (author, commenter); adomani (commenter)
+
+#35989: feat(RingTheory): define finite split algebras
+  URL: https://github.com/leanprover-community/mathlib4/pull/35989
+  Author: chrisflav
+  Workshop involvement: chrisflav (author)
+
+#35988: feat(NumberTheory/Height/Northcott): define Northcott functions
+  URL: https://github.com/leanprover-community/mathlib4/pull/35988
+  Author: tb65536
+  Workshop involvement: tb65536 (author)
+
+#35987: chore(Tactic/FunProp): document that config options must come before …
+  URL: https://github.com/leanprover-community/mathlib4/pull/35987
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#35986: feat: tag ContDiff.{continuous,differentiable} as fun_prop
+  URL: https://github.com/leanprover-community/mathlib4/pull/35986
+  Author: grunweg
+  Workshop involvement: grunweg (author, commenter)
+
+#35985: feat: vector bundle of `ContinuousAlternatingMap`s
+  URL: https://github.com/leanprover-community/mathlib4/pull/35985
+  Author: urkud
+  Workshop involvement: urkud (author)
+
+#35984: feat(Topology/VectorBundle): add `simp` lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/35984
+  Author: urkud
+  Workshop involvement: urkud (author)
+
+#35983: [Merged by Bors] - refactor(Topology/Sheaves/LocallySurjective): change `isLocallySurjective_iff`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35983
+  Author: smorel394
+  Workshop involvement: joelriou (commenter); smorel394 (author)
+
+#35982: [Merged by Bors] - feat(CategoryTheory/Monoidal/Grp_): zero morphisms in `Grp C`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35982
+  Author: tb65536
+  Workshop involvement: tb65536 (author); riccardobrasca (commenter)
+
+#35981: [Merged by Bors] - chore(RepresentationTheory/Basic): generalise to Semiring
+  URL: https://github.com/leanprover-community/mathlib4/pull/35981
+  Author: Whysoserioushah
+  Workshop involvement: Whysoserioushah (author, commenter); riccardobrasca (commenter)
+
+#35980: [Merged by Bors] - feat: covering numbers and isometries
+  URL: https://github.com/leanprover-community/mathlib4/pull/35980
+  Author: RemyDegenne
+  Workshop involvement: RemyDegenne (author); ocfnash (commenter)
+
+#35979: chore(RatFunc/AsPolynomial): use Valuation.IsTrivialOn and simplify proofs
+  URL: https://github.com/leanprover-community/mathlib4/pull/35979
+  Author: xgenereux
+  Workshop involvement: xgenereux (author)
+
+#35978: [Merged by Bors] - chore(Topology/FiberBundle/Trivialisation): more simp lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/35978
+  Author: grunweg
+  Workshop involvement: grunweg (author)
+
+#35977: feat(Algebra/Homology): add dimension lemmas for homological complex differentials
+  URL: https://github.com/leanprover-community/mathlib4/pull/35977
+  Author: jessealama
+  Workshop involvement: jessealama (author)
+
+#35976: feat: add add Liu's uncertainty theory foundations (core/distribution/process modules)
+  URL: https://github.com/leanprover-community/mathlib4/pull/35976
+  Author: Phelixh
+  Workshop involvement: Phelixh (author)
+
+#35975: [Merged by Bors] - feat: inv_bijective
+  URL: https://github.com/leanprover-community/mathlib4/pull/35975
+  Author: Ruben-VandeVelde
+  Workshop involvement: Ruben-VandeVelde (author, commenter); grunweg (commenter)
+
+#35974: feat(Algebra/Polynomial/Bivariate): more API for swap
+  URL: https://github.com/leanprover-community/mathlib4/pull/35974
+  Author: justus-springer
+  Workshop involvement: justus-springer (author)
+
+#35973: feat(Algebra/Polynomial/BigOperators): A lemma about degrees of sums
+  URL: https://github.com/leanprover-community/mathlib4/pull/35973
+  Author: justus-springer
+  Workshop involvement: justus-springer (author)
+
+#35972: [Merged by Bors] - chore: fix naming in `WithVal`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35972
+  Author: smmercuri
+  Workshop involvement: smmercuri (author)
+
+#35971: feat(Algebra/Homology): lifting properties for cochain complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/35971
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#35970: feat(CategoryTheory/Profunctor): Add profunctors and a basic API for them
+  URL: https://github.com/leanprover-community/mathlib4/pull/35970
+  Author: adrianmartir
+  Workshop involvement: adrianmartir (author, commenter); emilyriehl (commenter)
+
+#35969: [Merged by Bors] - feat(GroupTheory): explicit isomorphism between infinite cyclic groups and Z
+  URL: https://github.com/leanprover-community/mathlib4/pull/35969
+  Author: erdOne
+  Workshop involvement: vihdzp (commenter); erdOne (author); riccardobrasca (commenter); plp127 (commenter)
+
+#35968: [Merged by Bors] - feat: characteristic function of a sum of independent variables
+  URL: https://github.com/leanprover-community/mathlib4/pull/35968
+  Author: EtienneC30
+  Workshop involvement: EtienneC30 (author)
+
+#35967: [Merged by Bors] - feat(CategoryTheory/Monoidal/Grp_): `Grp` has terminal objects
+  URL: https://github.com/leanprover-community/mathlib4/pull/35967
+  Author: tb65536
+  Workshop involvement: joelriou (commenter); tb65536 (author)
+
+#35966: feat(CategoryTheory/Abelian): the localization w.r.t. a Serre class is abelian
+  URL: https://github.com/leanprover-community/mathlib4/pull/35966
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#35965: chore: make class constructor in metric spaces an abbrev instead of a def
+  URL: https://github.com/leanprover-community/mathlib4/pull/35965
+  Author: sgouezel
+  Workshop involvement: sgouezel (author)
+
+#35964: feat(CategoryTheory/Linear): define category algebra
+  URL: https://github.com/leanprover-community/mathlib4/pull/35964
+  Author: b-reinke
+  Workshop involvement: b-reinke (author)
+
+#35963: refactor: review Kleene algebra axioms
+  URL: https://github.com/leanprover-community/mathlib4/pull/35963
+  Author: Parcly-Taxel
+  Workshop involvement: Parcly-Taxel (author)
+
+#35962: chore: golf using `simp`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35962
+  Author: euprunin
+  Workshop involvement: euprunin (author)
+
+#35961: feat(CategoryTheory/Sites): fiber functors invert morphisms which become isomorphisms after sheafification
+  URL: https://github.com/leanprover-community/mathlib4/pull/35961
+  Author: joelriou
+  Workshop involvement: joelriou (author)
+
+#35960: chore(Order/ConditionallyCompleteLattice/Basic): remove `backward.isDefEq.respectTransparency`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35960
+  Author: vihdzp
+  Workshop involvement: vihdzp (author)
+
+#35959: [Merged by Bors] - chore: fix defeq abuse in Boolean Algebra instance on Set alpha
+  URL: https://github.com/leanprover-community/mathlib4/pull/35959
+  Author: sgouezel
+  Workshop involvement: sgouezel (author, commenter)
+
+#35958: ci: add conditionals on lean-pr-testing steps
+  URL: https://github.com/leanprover-community/mathlib4/pull/35958
+  Author: bryangingechen
+  Workshop involvement: bryangingechen (author)
+
+#35957: feat: add dist_center_midpoint_lt_radius for spheres
+  URL: https://github.com/leanprover-community/mathlib4/pull/35957
+  Author: Scarlett-le
+  Workshop involvement: Scarlett-le (author)
+
+#35956: feat: add orthogonality lemmas for inner product spacesonal
+  URL: https://github.com/leanprover-community/mathlib4/pull/35956
+  Author: Scarlett-le
+  Workshop involvement: Scarlett-le (author)
+
+#35955: [Merged by Bors] - chore: delete entries from prime nolint file
+  URL: https://github.com/leanprover-community/mathlib4/pull/35955
+  Author: BoltonBailey
+  Workshop involvement: BoltonBailey (author); grunweg (commenter)
+
+#35954: feat(Analysis/Fourier): the Fourier transform as bounded continuous function
+  URL: https://github.com/leanprover-community/mathlib4/pull/35954
+  Author: mcdoll
+  Workshop involvement: mcdoll (author)
+
+#35953: feat(Analysis/SchwartzMap): estimates for `Lp` and `BCF` norms
+  URL: https://github.com/leanprover-community/mathlib4/pull/35953
+  Author: mcdoll
+  Workshop involvement: mcdoll (author)
+
+#35952: [Merged by Bors] - chore: add/remove `set_option backward` after moving to `v4.29.0-rc3`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35952
+  Author: kim-em
+  Workshop involvement: kim-em (author, commenter); sgouezel (commenter); joelriou (commenter)
+
+#35951: feat(CategoryTheory/Monoidal): evaluation coevaluation isomorphisms
+  URL: https://github.com/leanprover-community/mathlib4/pull/35951
+  Author: parabamoghv
+  Workshop involvement: parabamoghv (author)
+
+#35950: feat(Tactic): add inferInstanceAs% to fix type leakage
+  URL: https://github.com/leanprover-community/mathlib4/pull/35950
+  Author: kim-em
+  Workshop involvement: kim-em (author, commenter); astrainfinita (commenter); JovanGerb (commenter)
+
+#35949: [Merged by Bors] - chore(Mathlib/CategoryTheory/Sites): more API for `Presieve.map`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35949
+  Author: mathlib-splicebot[bot]
+  Workshop involvement: erdOne (commenter); riccardobrasca (commenter)
+
+#35948: feat(AlgebraicGeometry): the pro-étale site of a scheme
+  URL: https://github.com/leanprover-community/mathlib4/pull/35948
+  Author: chrisflav
+  Workshop involvement: chrisflav (author)
+
+#35943: feat(Analysis/Complex/Trigonometric): `cos(2x) = 1 - 2 * sin(x)^2`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35943
+  Author: SnirBroshi
+  Workshop involvement: vihdzp (commenter); SnirBroshi (commenter)
+
+#35938: [Merged by Bors] - feat(Algebra/Homology): compatibilities for homology functors
+  URL: https://github.com/leanprover-community/mathlib4/pull/35938
+  Author: joelriou
+  Workshop involvement: joelriou (commenter); riccardobrasca (commenter)
+
+#35937: [Merged by Bors] - feat(CategoryTheory/Shift): naturality lemmas for ShiftedHom.map
+  URL: https://github.com/leanprover-community/mathlib4/pull/35937
+  Author: joelriou
+  Workshop involvement: joelriou (commenter); mattrobball (commenter); riccardobrasca (commenter)
+
+#35936: [Merged by Bors] - feat(Algebra/Homology): lemmas and instances for truncation of cochain complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/35936
+  Author: joelriou
+  Workshop involvement: joelriou (commenter); mattrobball (commenter); riccardobrasca (commenter)
+
+#35935: [Merged by Bors] - feat(Algebra/Homology): limits of degreewise eventually constant projective systems
+  URL: https://github.com/leanprover-community/mathlib4/pull/35935
+  Author: joelriou
+  Workshop involvement: mattrobball (commenter)
+
+#35934: [Merged by Bors] - feat(Algebra/Homology): more lemmas for the biproduct of complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/35934
+  Author: joelriou
+  Workshop involvement: joelriou (commenter); mattrobball (commenter)
+
+#35932: [Merged by Bors] - chore(CategoryTheory): improve Factorisation
+  URL: https://github.com/leanprover-community/mathlib4/pull/35932
+  Author: joelriou
+  Workshop involvement: b-mehta (commenter); riccardobrasca (commenter)
+
+#35931: [Merged by Bors] - feat(Algebra/Homology): lemmas for diagram chasing in homological complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/35931
+  Author: joelriou
+  Workshop involvement: bryangingechen (commenter); riccardobrasca (commenter)
+
+#35930: [Merged by Bors] - feat(CategoryTheory/Abelian): lemmas for diagram chasing in short complexes
+  URL: https://github.com/leanprover-community/mathlib4/pull/35930
+  Author: joelriou
+  Workshop involvement: mattrobball (commenter)
+
+#35929: [Merged by Bors] - feat(Algebra/Homology): the mapping cocone
+  URL: https://github.com/leanprover-community/mathlib4/pull/35929
+  Author: joelriou
+  Workshop involvement: joelriou (commenter)
+
+#35928: feat(Subalgebra/Lattice): add notation for Algebra.adjoin
+  URL: https://github.com/leanprover-community/mathlib4/pull/35928
+  Author: xgenereux
+  Workshop involvement: xgenereux (commenter)
+
+#35926: chore(ENNReal/Inv): lemma variants for `norm_cast`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35926
+  Author: hrmacbeth
+  Workshop involvement: bryangingechen (commenter); grunweg (commenter); faenuccio (commenter)
+
+#35920: [Merged by Bors] - chore(CategoryTheory/Sites): generalize `Precoverage.toGrothendieck_le_iff_le_toPrecoverage`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35920
+  Author: chrisflav
+  Workshop involvement: chrisflav (commenter); bryangingechen (commenter); riccardobrasca (commenter)
+
+#35919: [Merged by Bors] - feat(NumberTheory/Height): formula for logHeight₁
+  URL: https://github.com/leanprover-community/mathlib4/pull/35919
+  Author: MichaelStollBayreuth
+  Workshop involvement: MichaelStollBayreuth (commenter)
+
+#35918: [Merged by Bors] - feat(GroupTheory/Descent): add abstract descent theorem
+  URL: https://github.com/leanprover-community/mathlib4/pull/35918
+  Author: MichaelStollBayreuth
+  Workshop involvement: kbuzzard (commenter); MichaelStollBayreuth (commenter)
+
+#35915: [Merged by Bors] - feat(AlgebraicGeometry): constant sheaf associated to a topological space
+  URL: https://github.com/leanprover-community/mathlib4/pull/35915
+  Author: chrisflav
+  Workshop involvement: joelriou (commenter)
+
+#35914: feat(Analysis/Complex): weaken hypothesis in Borel-Caratheodory theorem
+  URL: https://github.com/leanprover-community/mathlib4/pull/35914
+  Author: ajirving
+  Workshop involvement: maksym-radziwill (commenter)
+
+#35903: [Merged by Bors] - chore: make CompleteLattice helpers instance reducible
+  URL: https://github.com/leanprover-community/mathlib4/pull/35903
+  Author: matthewjasper
+  Workshop involvement: sgouezel (commenter)
+
+#35902: [Merged by Bors] - feat(CategoryTheory/Sites): homotopy equivalent hypercovers have equivalent sheaf conditions
+  URL: https://github.com/leanprover-community/mathlib4/pull/35902
+  Author: chrisflav
+  Workshop involvement: chrisflav (commenter); joelriou (commenter)
+
+#35901: [Merged by Bors] - feat(CategoryTheory/Sites): isomorphic hypercovers have equivalent sheaf conditions
+  URL: https://github.com/leanprover-community/mathlib4/pull/35901
+  Author: chrisflav
+  Workshop involvement: chrisflav (commenter); joelriou (commenter); riccardobrasca (commenter)
+
+#35898: [Merged by Bors] - feat(Algebra/Star/StarProjection): add `IsStarProjection.map`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35898
+  Author: themathqueen
+  Workshop involvement: themathqueen (commenter)
+
+#35897: feat(Algebra/Ring/Subring): the equivalence between two equal subrings
+  URL: https://github.com/leanprover-community/mathlib4/pull/35897
+  Author: joelriou
+  Workshop involvement: joelriou (commenter)
+
+#35891: [Merged by Bors] - chore: move differential geometry elaborators tests into a separate directory
+  URL: https://github.com/leanprover-community/mathlib4/pull/35891
+  Author: grunweg
+  Workshop involvement: ocfnash (commenter)
+
+#35890: chore: delete deprecated module Topology/PartialHomeomorph
+  URL: https://github.com/leanprover-community/mathlib4/pull/35890
+  Author: grunweg
+  Workshop involvement: fpvandoorn (commenter)
+
+#35884: chore: fix induction and recursor names
+  URL: https://github.com/leanprover-community/mathlib4/pull/35884
+  Author: Parcly-Taxel
+  Workshop involvement: Parcly-Taxel (commenter)
+
+#35875: [Merged by Bors] - fix(Translate): remap ConstantInfo.all during declaration translation
+  URL: https://github.com/leanprover-community/mathlib4/pull/35875
+  Author: adamtopaz
+  Workshop involvement: JovanGerb (commenter); adomani (commenter)
+
+#35873: [Merged by Bors] - chore: delete deprecated modules to end August 2025
+  URL: https://github.com/leanprover-community/mathlib4/pull/35873
+  Author: Parcly-Taxel
+  Workshop involvement: Parcly-Taxel (commenter); Vierkantor (commenter)
+
+#35870: [Merged by Bors] - feat: weaken assumptions for integration by parts
+  URL: https://github.com/leanprover-community/mathlib4/pull/35870
+  Author: fpvandoorn
+  Workshop involvement: fpvandoorn (commenter)
+
+#35864: feat(Adjoin/Polynomial): add RingHom/Transcendental lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/35864
+  Author: xgenereux
+  Workshop involvement: xgenereux (commenter)
+
+#35856: [Merged by Bors] - doc(misc): fix typos
+  URL: https://github.com/leanprover-community/mathlib4/pull/35856
+  Author: harahu
+  Workshop involvement: harahu (commenter); ocfnash (commenter)
+
+#35855: [Merged by Bors] - chore(SetTheory/Ordinal/Basic): deprecate `Ordinal.induction` → `WellFoundedLT.induction`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35855
+  Author: vihdzp
+  Workshop involvement: riccardobrasca (commenter)
+
+#35847: chore: golf proofs
+  URL: https://github.com/leanprover-community/mathlib4/pull/35847
+  Author: euprunin
+  Workshop involvement: JovanGerb (commenter); riccardobrasca (commenter)
+
+#35845: [Merged by Bors] - chore(AlgebraicGeometry): Remove TODO and fix documentation
+  URL: https://github.com/leanprover-community/mathlib4/pull/35845
+  Author: Brian-Nugent
+  Workshop involvement: ocfnash (commenter)
+
+#35837: [Merged by Bors] - feat(LinearAlgebra/AffineSpace): iff lemma about the inverse of a homothety
+  URL: https://github.com/leanprover-community/mathlib4/pull/35837
+  Author: wwylele
+  Workshop involvement: wwylele (commenter)
+
+#35835: [Merged by Bors] - feat(MeasureTheory): add lemma for sum_smul_dirac_singleton
+  URL: https://github.com/leanprover-community/mathlib4/pull/35835
+  Author: b-mehta
+  Workshop involvement: RemyDegenne (commenter)
+
+#35823: [Merged by Bors] - ci: Decouple workflow scripts into the mathlib-ci repository
+  URL: https://github.com/leanprover-community/mathlib4/pull/35823
+  Author: marcelolynch
+  Workshop involvement: bryangingechen (commenter); marcelolynch (commenter)
+
+#35814: [Merged by Bors] - chore(Tactic): rewrite `field`/`field_simp` tactic documentation
+  URL: https://github.com/leanprover-community/mathlib4/pull/35814
+  Author: Vierkantor
+  Workshop involvement: alexjbest (commenter); riccardobrasca (commenter)
+
+#35810: [Merged by Bors] - feat(NumberTheory/ArithmeticFunction/Defs): define the Dirichlet inverse of an arithmetic function
+  URL: https://github.com/leanprover-community/mathlib4/pull/35810
+  Author: tb65536
+  Workshop involvement: tb65536 (commenter)
+
+#35806: [Merged by Bors] - feat(CategoryTheory/Monoidal/Limits): colimit of tensor products
+  URL: https://github.com/leanprover-community/mathlib4/pull/35806
+  Author: joelriou
+  Workshop involvement: joelriou (commenter)
+
+#35805: feat(NumberTheory/Divisors): Add `infinite_setOf_divisors_iff`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35805
+  Author: adrianmartir
+  Workshop involvement: adrianmartir (commenter); alexjbest (commenter)
+
+#35790: feat(CategoryTheory/Algebra): Flasque Sheaves have vanishing cohomology
+  URL: https://github.com/leanprover-community/mathlib4/pull/35790
+  Author: Brian-Nugent
+  Workshop involvement: smorel394 (commenter); Brian-Nugent (commenter)
+
+#35787: [Merged by Bors] - feat(Analysis/SchwartzSpace): post composition with continuous linear map
+  URL: https://github.com/leanprover-community/mathlib4/pull/35787
+  Author: mcdoll
+  Workshop involvement: mcdoll (commenter)
+
+#35785: feat(CategoryTheory/Topology): Add Flasque Sheaves
+  URL: https://github.com/leanprover-community/mathlib4/pull/35785
+  Author: Brian-Nugent
+  Workshop involvement: smorel394 (commenter)
+
+#35782: [Merged by Bors] - feat(MeasureTheory): Add an AEMeasurable version of `Measure.map_add`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35782
+  Author: DavidLedvinka
+  Workshop involvement: riccardobrasca (commenter)
+
+#35770: [Merged by Bors] - feat(RingTheory/Localization/FractionRing): add DecidableEq instance
+  URL: https://github.com/leanprover-community/mathlib4/pull/35770
+  Author: mariainesdff
+  Workshop involvement: riccardobrasca (commenter)
+
+#35768: [Merged by Bors] - feat(RingTheory/DividedPowers/Basic): add lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/35768
+  Author: mariainesdff
+  Workshop involvement: mariainesdff (commenter)
+
+#35761: [Merged by Bors] - chore: mark Submodule.toAddSubgroup @[reducible]
+  URL: https://github.com/leanprover-community/mathlib4/pull/35761
+  Author: kim-em
+  Workshop involvement: kim-em (commenter)
+
+#35759: [Merged by Bors] - feat(CategoryTheory/Elements): functors to types are colimits of corepresentable functors
+  URL: https://github.com/leanprover-community/mathlib4/pull/35759
+  Author: joelriou
+  Workshop involvement: joelriou (commenter); riccardobrasca (commenter)
+
+#35758: [Merged by Bors] - chore: use `to_dual` on `WellFoundedLT.toOrderBot`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35758
+  Author: vihdzp
+  Workshop involvement: JovanGerb (commenter); faenuccio (commenter)
+
+#35742: [Merged by Bors] - refactor: make `Order.pred_eq_sub_one` a simp lemma
+  URL: https://github.com/leanprover-community/mathlib4/pull/35742
+  Author: vihdzp
+  Workshop involvement: ocfnash (commenter)
+
+#35730: [Merged by Bors] - chore(NumberTheory/ModularForms): golf using custom elaborators
+  URL: https://github.com/leanprover-community/mathlib4/pull/35730
+  Author: grunweg
+  Workshop involvement: riccardobrasca (commenter)
+
+#35728: [Merged by Bors] - chore(SmoothSection): golf using custom elaborators
+  URL: https://github.com/leanprover-community/mathlib4/pull/35728
+  Author: grunweg
+  Workshop involvement: PatrickMassot (commenter)
+
+#35727: [Merged by Bors] - chore(Analysis/Complex): simplify proof of `Complex.orderClosedTopology`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35727
+  Author: euprunin
+  Workshop involvement: j-loreaux (commenter)
+
+#35726: [Merged by Bors] - chore: golf using `simp`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35726
+  Author: euprunin
+  Workshop involvement: j-loreaux (commenter)
+
+#35706: [Merged by Bors] - chore(Algebra/Group/Finsupp): fix argument names
+  URL: https://github.com/leanprover-community/mathlib4/pull/35706
+  Author: vihdzp
+  Workshop involvement: riccardobrasca (commenter)
+
+#35699: [Merged by Bors] - chore(RingTheory/Etale/Kaehler): mention `FormallyEtale` in the names
+  URL: https://github.com/leanprover-community/mathlib4/pull/35699
+  Author: chrisflav
+  Workshop involvement: riccardobrasca (commenter)
+
+#35673: feat: radical lemmas for natural numbers and integers
+  URL: https://github.com/leanprover-community/mathlib4/pull/35673
+  Author: Parcly-Taxel
+  Workshop involvement: riccardobrasca (commenter)
+
+#35640: [Merged by Bors] - feat: Liouville Theorem for harmonic functions
+  URL: https://github.com/leanprover-community/mathlib4/pull/35640
+  Author: kebekus
+  Workshop involvement: grunweg (commenter); kebekus (commenter); j-loreaux (commenter)
+
+#35581: feat(RingTheory/MvPolynomial): MvPolynomial is isomorphic to the direct sum of its homogeneous submodules
+  URL: https://github.com/leanprover-community/mathlib4/pull/35581
+  Author: mpenciak
+  Workshop involvement: mpenciak (commenter)
+
+#35544: feat(RingTheory): `I / I ^ 2` commutes with flat base change
+  URL: https://github.com/leanprover-community/mathlib4/pull/35544
+  Author: chrisflav
+  Workshop involvement: chrisflav (commenter); erdOne (commenter); riccardobrasca (commenter)
+
+#35515: [Merged by Bors] - feat(Topology/HomotopyGroup): Homeomorphism between GenLoop
+  URL: https://github.com/leanprover-community/mathlib4/pull/35515
+  Author: WenrongZou
+  Workshop involvement: WenrongZou (commenter)
+
+#35497: [Merged by Bors] - feat(CategoryTheory/Triangulated): add extension_product
+  URL: https://github.com/leanprover-community/mathlib4/pull/35497
+  Author: justus-springer
+  Workshop involvement: joelriou (commenter)
+
+#35496: [Merged by Bors] - feat(CategoryTheory/Triangulated): Rotated octahedron axiom
+  URL: https://github.com/leanprover-community/mathlib4/pull/35496
+  Author: justus-springer
+  Workshop involvement: joelriou (commenter)
+
+#35442: feat: Affine line with doubled origin counter example
+  URL: https://github.com/leanprover-community/mathlib4/pull/35442
+  Author: dhyan-aranha
+  Workshop involvement: dhyan-aranha (commenter)
+
+#35362: [Merged by Bors] - feat(CategoryTheory/Triangulated/TStructure): more on `truncLT` and `truncGE`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35362
+  Author: joelriou
+  Workshop involvement: joelriou (commenter)
+
+#35359: [Merged by Bors] - feat(Algebra/Homology/SpectralObject): kernel and cokernel of differentials
+  URL: https://github.com/leanprover-community/mathlib4/pull/35359
+  Author: joelriou
+  Workshop involvement: joelriou (commenter)
+
+#35321: [Merged by Bors] - doc: capitalize the proper name Kan
+  URL: https://github.com/leanprover-community/mathlib4/pull/35321
+  Author: harahu
+  Workshop involvement: ocfnash (commenter)
+
+#35301: feat: `klDiv` and scalar multiplication
+  URL: https://github.com/leanprover-community/mathlib4/pull/35301
+  Author: RemyDegenne
+  Workshop involvement: EtienneC30 (commenter); riccardobrasca (commenter); ocfnash (commenter)
+
+#35269: [Merged by Bors] - refactor(Topology/Algebra/Module/LinearMap): adjust statement of `coe_mul` and `coe_pow`
+  URL: https://github.com/leanprover-community/mathlib4/pull/35269
+  Author: tb65536
+  Workshop involvement: tb65536 (commenter); ocfnash (commenter)
+
+#35095: feat: overlapping instances linter
+  URL: https://github.com/leanprover-community/mathlib4/pull/35095
+  Author: thorimur
+  Workshop involvement: JovanGerb (commenter); thorimur (commenter)
+
+#35069: feat(Geometry/Polygon): simple polygons and boundary map
+  URL: https://github.com/leanprover-community/mathlib4/pull/35069
+  Author: A-M-Berns
+  Workshop involvement: vihdzp (commenter); A-M-Berns (commenter)
+
+#35015: feat: `rnDeriv` as ratio of densities wrt a dominating measure
+  URL: https://github.com/leanprover-community/mathlib4/pull/35015
+  Author: RemyDegenne
+  Workshop involvement: EtienneC30 (commenter)
+
+#35014: [Merged by Bors] - feat: Radon-Nikodym derivative of a composition-product
+  URL: https://github.com/leanprover-community/mathlib4/pull/35014
+  Author: RemyDegenne
+  Workshop involvement: RemyDegenne (commenter)
+
+#35005: chore(Algebra/Order/BigOperators): move lemmas which don't use addition out of Ring
+  URL: https://github.com/leanprover-community/mathlib4/pull/35005
+  Author: b-mehta
+  Workshop involvement: bryangingechen (commenter); riccardobrasca (commenter)
+
+#34962: (PR #34962 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34962
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter)
+
+#34961: (PR #34961 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34961
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter)
+
+#34959: (PR #34959 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34959
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter); SnirBroshi (commenter)
+
+#34958: (PR #34958 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34958
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter)
+
+#34957: (PR #34957 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34957
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter)
+
+#34881: feat(ModularForm/NumberTheory/Delta): Define the delta function
+  URL: https://github.com/leanprover-community/mathlib4/pull/34881
+  Author: CBirkbeck
+  Workshop involvement: faenuccio (commenter); loefflerd (commenter)
+
+#34877: [Merged by Bors] - refactor(RingTheory/Localization/Integral): Simplify `integerNormalization`
+  URL: https://github.com/leanprover-community/mathlib4/pull/34877
+  Author: justus-springer
+  Workshop involvement: faenuccio (commenter)
+
+#34777: feat(Combinatorics/SetFamily/Intersecting): L-intersecting families
+  URL: https://github.com/leanprover-community/mathlib4/pull/34777
+  Author: sqrt-of-2
+  Workshop involvement: b-mehta (commenter); YaelDillies (commenter); sqrt-of-2 (commenter)
+
+#34711: refactor(padicValNat): redefine using `maxPowDvdDiv`
+  URL: https://github.com/leanprover-community/mathlib4/pull/34711
+  Author: urkud
+  Workshop involvement: b-mehta (commenter)
+
+#34658: feat(Algebra/Group/FiniteSupport): add HasFinite(Mul)Support and API
+  URL: https://github.com/leanprover-community/mathlib4/pull/34658
+  Author: MichaelStollBayreuth
+  Workshop involvement: MichaelStollBayreuth (commenter)
+
+#34611: [Merged by Bors] - feat: perfect subgroups
+  URL: https://github.com/leanprover-community/mathlib4/pull/34611
+  Author: adomani
+  Workshop involvement: riccardobrasca (commenter)
+
+#34521: feat(MeasureTheory): add measurableEmbedding_natCast
+  URL: https://github.com/leanprover-community/mathlib4/pull/34521
+  Author: huaizhangchu
+  Workshop involvement: huaizhangchu (commenter)
+
+#34491: feat(ContinuousMultilinearMap): generalize some definitions
+  URL: https://github.com/leanprover-community/mathlib4/pull/34491
+  Author: urkud
+  Workshop involvement: urkud (commenter); PatrickMassot (commenter)
+
+#34267: [Merged by Bors] - feat(Topology/Algebra): Add API for Sheaves of abelian groups
+  URL: https://github.com/leanprover-community/mathlib4/pull/34267
+  Author: Brian-Nugent
+  Workshop involvement: joelriou (commenter)
+
+#34230: [Merged by Bors] - refactor: use 1-field structure to define the `WithAbs` type synonym
+  URL: https://github.com/leanprover-community/mathlib4/pull/34230
+  Author: smmercuri
+  Workshop involvement: chrisflav (commenter); smmercuri (commenter); riccardobrasca (commenter)
+
+#34215: feat(FieldTheory/RatFunc): Degree of field extension K(X)/K(f)
+  URL: https://github.com/leanprover-community/mathlib4/pull/34215
+  Author: justus-springer
+  Workshop involvement: justus-springer (commenter)
+
+#34049: [Merged by Bors] - refactor: use 1-field structure to define the `WithVal` type synonym
+  URL: https://github.com/leanprover-community/mathlib4/pull/34049
+  Author: smmercuri
+  Workshop involvement: riccardobrasca (commenter)
+
+#33840: [Merged by Bors] - feat(SetTheory/Ordinal/CantorNormalForm): Evaluate a Finsupp as a CNF
+  URL: https://github.com/leanprover-community/mathlib4/pull/33840
+  Author: vihdzp
+  Workshop involvement: vihdzp (commenter)
+
+#33650: refactor: deprecate bespoke `Hyperreal` machinery
+  URL: https://github.com/leanprover-community/mathlib4/pull/33650
+  Author: vihdzp
+  Workshop involvement: vihdzp (commenter)
+
+#33348: feat(LinearAlgebra/Transvection): characterization of transvections among dilatransvections
+  URL: https://github.com/leanprover-community/mathlib4/pull/33348
+  Author: AntoineChambert-Loir
+  Workshop involvement: AntoineChambert-Loir (commenter)
+
+#32583: refactor(SimpleGraph): change bridges not to require the edge to be present
+  URL: https://github.com/leanprover-community/mathlib4/pull/32583
+  Author: MJ141592
+  Workshop involvement: MJ141592 (commenter)
+
+#31817: [Merged by Bors] - chore: remove extra monic hypotheses from divByMonic and modByMonic lemmas
+  URL: https://github.com/leanprover-community/mathlib4/pull/31817
+  Author: kckennylau
+  Workshop involvement: mattrobball (commenter)
+
+#31690: (PR #31690 - title not fetched)
+  URL: https://github.com/leanprover-community/mathlib4/pull/31690
+  Author: unknown
+  Workshop involvement: SproutSeeds (commenter)
+
+#31132: feat(Algebra): saturation of a submonoid
+  URL: https://github.com/leanprover-community/mathlib4/pull/31132
+  Author: kckennylau
+  Workshop involvement: kbuzzard (commenter); kckennylau (commenter)
+
+#31007: [Merged by Bors] - feat(RingTheory): generalise perfection to monoids
+  URL: https://github.com/leanprover-community/mathlib4/pull/31007
+  Author: kckennylau
+  Workshop involvement: kbuzzard (commenter); kckennylau (commenter)
+
+#30989: feat(RingTheory): Teichmuller map
+  URL: https://github.com/leanprover-community/mathlib4/pull/30989
+  Author: kckennylau
+  Workshop involvement: riccardobrasca (commenter); kckennylau (commenter)
+
+#30811: feat(AlgebraicGeometry.EffectiveEpi): effective epimorphisms in schemes 
+  URL: https://github.com/leanprover-community/mathlib4/pull/30811
+  Author: yonggyuchoimath
+  Workshop involvement: chrisflav (commenter); yonggyuchoimath (commenter)
+
+#30355: [Merged by Bors] - feat(Logic): graded functions
+  URL: https://github.com/leanprover-community/mathlib4/pull/30355
+  Author: kckennylau
+  Workshop involvement: mattrobball (commenter); riccardobrasca (commenter)
+
+#30312: feat(RingTheory): define graded ring homomorphisms
+  URL: https://github.com/leanprover-community/mathlib4/pull/30312
+  Author: kckennylau
+  Workshop involvement: bryangingechen (commenter); riccardobrasca (commenter); kckennylau (commenter)
+
+#30204: [Merged by Bors] - feat(Algebra/Category/Ring/EqualizerPushout): add effectiveEpi_of_faithfullyFlat in CommRingCatᵒᵖ
+  URL: https://github.com/leanprover-community/mathlib4/pull/30204
+  Author: yonggyuchoimath
+  Workshop involvement: chrisflav (commenter); mattrobball (commenter)
+
+#29449: [Merged by Bors] - feat(Combinatorics/SimpleGraph): more API for Turán density
+  URL: https://github.com/leanprover-community/mathlib4/pull/29449
+  Author: mitchell-horner
+  Workshop involvement: YaelDillies (commenter)
+
+#28072: feat(RingTheory/Valuation): make tactic rw_val_equiv
+  URL: https://github.com/leanprover-community/mathlib4/pull/28072
+  Author: kckennylau
+  Workshop involvement: kckennylau (commenter)
+
+#26961: feat(RingTheory/PowerSeries/Substitution): add API
+  URL: https://github.com/leanprover-community/mathlib4/pull/26961
+  Author: mariainesdff
+  Workshop involvement: mariainesdff (commenter)
+
+#26588: [Merged by Bors] - feat(Algebra/GroupWithZero/WithZero): add the multiplicative embedding with zero from the range
+  URL: https://github.com/leanprover-community/mathlib4/pull/26588
+  Author: faenuccio
+  Workshop involvement: kbuzzard (commenter); faenuccio (commenter)
+
+#26293: feat: tightness from convergence of characteristic functions
+  URL: https://github.com/leanprover-community/mathlib4/pull/26293
+  Author: RemyDegenne
+  Workshop involvement: EtienneC30 (commenter)
+
+#26292: [Merged by Bors] - feat(MeasureTheory): tightness of the range of a sequence
+  URL: https://github.com/leanprover-community/mathlib4/pull/26292
+  Author: RemyDegenne
+  Workshop involvement: RemyDegenne (commenter)
+
+================================================================================
+SUMMARY
+================================================================================
+Date range: 2026-03-02 to 2026-03-03
+Unique people active: 81
+PRs created in range: 123
+Total PRs with activity: 233
+Non-bot comments in range: 280
