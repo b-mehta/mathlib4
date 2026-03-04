@@ -239,7 +239,7 @@ def main():
         print("No PRs found.", file=sys.stderr)
         return
 
-    git_prs.sort(key=lambda p: p["number"])
+    git_prs.sort(key=lambda p: p["merged_at"])
 
     if args.git_only:
         for pr in git_prs:
