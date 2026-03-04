@@ -27,6 +27,7 @@ ATTENDEES = {
     "smorel394",
     "mariainesdff",
     "bhavikmehta8",
+    "b-mehta",
     "smmercuri",
     "kebekus",
     "DavidLedvinka",
