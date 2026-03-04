@@ -13,6 +13,34 @@ REPO = "leanprover-community/mathlib4"
 UPSTREAM_URL = f"https://github.com/{REPO}.git"
 SINCE = sys.argv[1] if len(sys.argv) > 1 else "2026-03-02T09:00:00Z"
 
+# Workshop attendees (GitHub usernames, case-insensitive matching)
+ATTENDEES = {
+    "joelriou",
+    "chrisflav",
+    "tb65536",
+    "EtienneC30",
+    "MichaelStollBayreuth",
+    "justus-springer",
+    "RemyDegenne",
+    "kc_kennylau",
+    "grunweg",
+    "smorel394",
+    "mariainesdff",
+    "bhavikmehta8",
+    "smmercuri",
+    "kebekus",
+    "DavidLedvinka",
+    "Whysoserioushah",
+    "erdOne",
+    "vdoorn",
+    "hrmacbeth",
+}
+_ATTENDEES_LOWER = {a.lower() for a in ATTENDEES}
+
+
+def is_attendee(author: str) -> bool:
+    return author.lower() in _ATTENDEES_LOWER
+
 
 def gh_api_get(path: str) -> dict | None:
     """Try gh CLI first, fall back to unauthenticated curl."""
@@ -102,6 +130,17 @@ email_to_username = resolve_authors(prs)
 for pr in prs:
     if pr["author"] in email_to_username:
         pr["author"] = email_to_username[pr["author"]]
+
+# Classify PRs
+attendee_prs = [pr for pr in prs if is_attendee(pr["author"])]
+other_prs = [pr for pr in prs if not is_attendee(pr["author"])]
+
+print(f"=== Workshop attendee PRs ({len(attendee_prs)}) ===")
+for pr in attendee_prs:
     print(json.dumps(pr))
 
-print(f"Done. Output {len(prs)} PRs.", file=sys.stderr)
+print(f"\n=== Non-attendee PRs ({len(other_prs)}) ===")
+for pr in other_prs:
+    print(json.dumps(pr))
+
+print(f"\nDone. {len(attendee_prs)} attendee PRs, {len(other_prs)} non-attendee PRs, {len(prs)} total.", file=sys.stderr)
