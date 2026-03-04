@@ -17,7 +17,7 @@ def run(*cmd, **kw):
 
 def gh_login(pr_num):
     r = run("gh", "api", f"repos/{REPO}/pulls/{pr_num}", "--jq", ".user.login", timeout=10)
-    return r.stdout.strip() or None if r.returncode == 0 else None
+    return r.stdout.strip() or None
 
 # Fetch and parse git log
 print("Fetching upstream master...", file=sys.stderr)
