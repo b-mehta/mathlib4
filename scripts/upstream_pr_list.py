@@ -22,16 +22,10 @@ import time
 import urllib.request
 import urllib.error
 
-REPO_OWNER = "leanprover-community"
-REPO_NAME = "mathlib4"
-UPSTREAM_URL = f"https://github.com/{REPO_OWNER}/{REPO_NAME}.git"
+UPSTREAM_URL = "https://github.com/leanprover-community/mathlib4.git"
+API_BASE = "https://api.github.com/repos/leanprover-community/mathlib4"
 DEFAULT_START_DATE = "2026-03-02T09:00:00Z"
-API_BASE = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}"
 
-
-# ---------------------------------------------------------------------------
-# GitHub REST API helpers
-# ---------------------------------------------------------------------------
 
 def github_get(path: str, token: str | None) -> list | dict:
     """GET a GitHub API endpoint, handling pagination, rate limits, and retries."""
@@ -40,10 +34,8 @@ def github_get(path: str, token: str | None) -> list | dict:
         headers["Authorization"] = f"Bearer {token}"
 
     all_items: list = []
-    url = f"{API_BASE}/{path}" if not path.startswith("http") else path
-    sep = "&" if "?" in url else "?"
-    if "per_page" not in url:
-        url += f"{sep}per_page=100"
+    url = f"{API_BASE}/{path}"
+    url += ("&" if "?" in url else "?") + "per_page=100"
 
     while url:
         req = urllib.request.Request(url, headers=headers)
@@ -54,14 +46,10 @@ def github_get(path: str, token: str | None) -> list | dict:
                     data = json.loads(resp.read().decode())
                     remaining = resp.headers.get("X-RateLimit-Remaining")
                     if remaining and int(remaining) < 5:
-                        reset_time = int(
-                            resp.headers.get("X-RateLimit-Reset", 0)
-                        )
-                        wait = max(0, reset_time - int(time.time())) + 1
-                        print(
-                            f"Rate limit nearly exhausted, waiting {wait}s...",
-                            file=sys.stderr,
-                        )
+                        reset = int(resp.headers.get("X-RateLimit-Reset", 0))
+                        wait = max(0, reset - int(time.time())) + 1
+                        print(f"Rate limit nearly exhausted, waiting {wait}s...",
+                              file=sys.stderr)
                         time.sleep(wait)
 
                     if isinstance(data, dict):
@@ -70,27 +58,23 @@ def github_get(path: str, token: str | None) -> list | dict:
                     all_items.extend(data)
 
                     url = None
-                    link_header = resp.headers.get("Link", "")
-                    for part in link_header.split(","):
+                    for part in resp.headers.get("Link", "").split(","):
                         if 'rel="next"' in part:
                             url = part.split("<")[1].split(">")[0]
-                break  # success, exit retry loop
+                break
             except urllib.error.HTTPError as e:
                 body = e.read().decode().lower()
                 if e.code == 403 and "rate limit" in body:
-                    reset_time = int(e.headers.get("X-RateLimit-Reset", 0))
-                    wait = max(0, reset_time - int(time.time())) + 1
+                    reset = int(e.headers.get("X-RateLimit-Reset", 0))
+                    wait = max(0, reset - int(time.time())) + 1
                     print(f"Rate limited, waiting {wait}s...", file=sys.stderr)
                     time.sleep(wait)
                     continue
                 if e.code >= 500 and retries < 4:
                     retries += 1
                     wait = 2 ** retries
-                    print(
-                        f"Server error {e.code}, retrying in {wait}s "
-                        f"({retries}/4)...",
-                        file=sys.stderr,
-                    )
+                    print(f"Server error {e.code}, retrying in {wait}s "
+                          f"({retries}/4)...", file=sys.stderr)
                     time.sleep(wait)
                     continue
                 raise
@@ -98,25 +82,16 @@ def github_get(path: str, token: str | None) -> list | dict:
     return all_items
 
 
-# ---------------------------------------------------------------------------
-# Git log parsing
-# ---------------------------------------------------------------------------
-
 def _author_from_email(email: str) -> str:
     """Extract a GitHub username from a noreply email, or return the email."""
-    # Handles both "12345678+user@users.noreply.github.com" and older
-    # "user@users.noreply.github.com" formats.
     m = re.match(r"(?:\d+\+)?(.+)@users\.noreply\.github\.com$", email)
-    if m:
-        return m.group(1)
-    return email
+    return m.group(1) if m else email
 
 
 def _title_from_subject(subject: str) -> str:
     """Strip the trailing '(#NNN)' and optional '[Merged by Bors] - ' prefix."""
     title = re.sub(r"\s*\(#\d+\)$", "", subject)
-    title = re.sub(r"^\[Merged by Bors\]\s*-\s*", "", title)
-    return title
+    return re.sub(r"^\[Merged by Bors\]\s*-\s*", "", title)
 
 
 def get_merged_prs_from_git(start_date: str) -> list[dict]:
@@ -126,41 +101,25 @@ def get_merged_prs_from_git(start_date: str) -> list[dict]:
     The author is extracted from the commit email (best-effort GitHub username).
     """
     print("Fetching upstream master...", file=sys.stderr)
-    # Use --shallow-since so that shallow clones get enough history.
-    # This is a no-op (harmless) on full clones.
     subprocess.run(
-        [
-            "git", "fetch",
-            f"--shallow-since={start_date}",
-            UPSTREAM_URL, "master",
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
+        ["git", "fetch", f"--shallow-since={start_date}", UPSTREAM_URL, "master"],
+        check=True, capture_output=True, text=True,
     )
 
-    # %aI = author date ISO, %ae = author email, %s = subject
     result = subprocess.run(
-        [
-            "git", "log",
-            f"--after={start_date}",
-            "FETCH_HEAD",
-            "--format=%aI\t%ae\t%s",
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
+        ["git", "log", f"--after={start_date}", "FETCH_HEAD", "--format=%aI\t%ae\t%s"],
+        check=True, capture_output=True, text=True,
     )
 
     prs: list[dict] = []
     for line in result.stdout.splitlines():
-        m = re.search(r"\(#(\d+)\)$", line.strip())
-        if not m:
-            continue
         parts = line.split("\t", 2)
         if len(parts) != 3:
             continue
         date_str, email, subject = parts
+        m = re.search(r"\(#(\d+)\)$", subject)
+        if not m:
+            continue
         prs.append({
             "number": int(m.group(1)),
             "title": _title_from_subject(subject),
@@ -172,35 +131,22 @@ def get_merged_prs_from_git(start_date: str) -> list[dict]:
     return prs
 
 
-# ---------------------------------------------------------------------------
-# API-based enrichment
-# ---------------------------------------------------------------------------
-
-def extract_commenters(
-    pr_author: str,
-    comments: list[dict],
-    reviews: list[dict],
-) -> list[str]:
-    """Extract unique commenter logins from comments and reviews."""
-    commenters: set[str] = set()
-    for item in (*comments, *reviews):
-        user = item.get("user")
-        if user and user.get("login"):
-            commenters.add(user["login"])
-
-    commenters.discard(pr_author)
-    return sorted(commenters)
-
-
 def fetch_pr_data(number: int, merge_time: str, token: str | None) -> dict:
     """Fetch full data for a single PR via the GitHub API."""
     pr = github_get(f"pulls/{number}", token)
     comments = github_get(f"issues/{number}/comments", token)
     reviews = github_get(f"pulls/{number}/reviews", token)
 
-    author = pr.get("user", {})
-    author_login = author.get("login", "ghost") if author else "ghost"
+    author = pr.get("user") or {}
+    author_login = author.get("login", "ghost")
     merged_at = pr.get("merged_at") or merge_time
+
+    commenters = {
+        login
+        for item in (*comments, *reviews)
+        if (user := item.get("user")) and (login := user.get("login"))
+    }
+    commenters.discard(author_login)
 
     return {
         "number": pr["number"],
@@ -208,26 +154,20 @@ def fetch_pr_data(number: int, merge_time: str, token: str | None) -> dict:
         "author": author_login,
         "created_at": pr["created_at"],
         "merged_at": merged_at,
-        "commenters": extract_commenters(author_login, comments, reviews),
+        "commenters": sorted(commenters),
     }
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(
         description="List PRs merged to mathlib4 after a given date."
     )
     parser.add_argument(
-        "--since",
-        default=DEFAULT_START_DATE,
+        "--since", default=DEFAULT_START_DATE,
         help=f"ISO 8601 datetime cutoff (default: {DEFAULT_START_DATE})",
     )
     parser.add_argument(
-        "--git-only",
-        action="store_true",
+        "--git-only", action="store_true",
         help="Use only git log data (no API calls). "
         "Omits created_at and commenters, author is best-effort.",
     )
@@ -259,21 +199,15 @@ def main():
     total = len(git_prs)
     print(f"Fetching details for {total} PRs (3 API calls each)...", file=sys.stderr)
 
-    workers = min(8, total)
-    results: dict[int, dict] = {}
+    def _fetch(pr: dict) -> dict:
+        print(f"  PR #{pr['number']}...", file=sys.stderr)
+        return fetch_pr_data(pr["number"], pr["merged_at"], token)
 
-    def _fetch(idx_pr: tuple[int, dict]) -> tuple[int, dict]:
-        i, pr = idx_pr
-        print(f"  [{i}/{total}] PR #{pr['number']}...", file=sys.stderr)
-        return i, fetch_pr_data(pr["number"], pr["merged_at"], token)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, total)) as pool:
+        results = list(pool.map(_fetch, git_prs))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        for i, pr_data in pool.map(_fetch, enumerate(git_prs, 1)):
-            results[i] = pr_data
-
-    # Output in merge-time order (same order as git_prs)
-    for i in range(1, total + 1):
-        print(json.dumps(results[i]))
+    for pr_data in results:
+        print(json.dumps(pr_data))
 
     print(f"Done. Output {total} PRs.", file=sys.stderr)
 
