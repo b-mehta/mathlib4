@@ -127,8 +127,14 @@ def get_merged_prs_from_git(start_date: str) -> list[dict]:
     The author is extracted from the commit email (best-effort GitHub username).
     """
     print("Fetching upstream master...", file=sys.stderr)
+    # Use --shallow-since so that shallow clones get enough history.
+    # This is a no-op (harmless) on full clones.
     subprocess.run(
-        ["git", "fetch", UPSTREAM_URL, "master"],
+        [
+            "git", "fetch",
+            f"--shallow-since={start_date}",
+            UPSTREAM_URL, "master",
+        ],
         check=True,
         capture_output=True,
         text=True,
