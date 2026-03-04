@@ -12,6 +12,7 @@ Modes:
 """
 
 import argparse
+import concurrent.futures
 import json
 import os
 import re
@@ -75,7 +76,8 @@ def github_get(path: str, token: str | None) -> list | dict:
                             url = part.split("<")[1].split(">")[0]
                 break  # success, exit retry loop
             except urllib.error.HTTPError as e:
-                if e.code == 403 and "rate limit" in e.read().decode().lower():
+                body = e.read().decode().lower()
+                if e.code == 403 and "rate limit" in body:
                     reset_time = int(e.headers.get("X-RateLimit-Reset", 0))
                     wait = max(0, reset_time - int(time.time())) + 1
                     print(f"Rate limited, waiting {wait}s...", file=sys.stderr)
@@ -102,12 +104,9 @@ def github_get(path: str, token: str | None) -> list | dict:
 
 def _author_from_email(email: str) -> str:
     """Extract a GitHub username from a noreply email, or return the email."""
-    # GitHub noreply format: "12345678+username@users.noreply.github.com"
-    m = re.match(r"\d+\+(.+)@users\.noreply\.github\.com$", email)
-    if m:
-        return m.group(1)
-    # Older format: "username@users.noreply.github.com"
-    m = re.match(r"(.+)@users\.noreply\.github\.com$", email)
+    # Handles both "12345678+user@users.noreply.github.com" and older
+    # "user@users.noreply.github.com" formats.
+    m = re.match(r"(?:\d+\+)?(.+)@users\.noreply\.github\.com$", email)
     if m:
         return m.group(1)
     return email
@@ -184,14 +183,8 @@ def extract_commenters(
 ) -> list[str]:
     """Extract unique commenter logins from comments and reviews."""
     commenters: set[str] = set()
-
-    for c in comments:
-        user = c.get("user")
-        if user and user.get("login"):
-            commenters.add(user["login"])
-
-    for r in reviews:
-        user = r.get("user")
+    for item in (*comments, *reviews):
+        user = item.get("user")
         if user and user.get("login"):
             commenters.add(user["login"])
 
@@ -263,16 +256,24 @@ def main():
             file=sys.stderr,
         )
 
-    merge_times = {pr["number"]: pr["merged_at"] for pr in git_prs}
     total = len(git_prs)
     print(f"Fetching details for {total} PRs (3 API calls each)...", file=sys.stderr)
 
-    for i, pr in enumerate(git_prs, 1):
-        number = pr["number"]
-        print(f"  [{i}/{total}] PR #{number}...", file=sys.stderr)
-        pr_data = fetch_pr_data(number, merge_times[number], token)
-        print(json.dumps(pr_data))
-        sys.stdout.flush()
+    workers = min(8, total)
+    results: dict[int, dict] = {}
+
+    def _fetch(idx_pr: tuple[int, dict]) -> tuple[int, dict]:
+        i, pr = idx_pr
+        print(f"  [{i}/{total}] PR #{pr['number']}...", file=sys.stderr)
+        return i, fetch_pr_data(pr["number"], pr["merged_at"], token)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        for i, pr_data in pool.map(_fetch, enumerate(git_prs, 1)):
+            results[i] = pr_data
+
+    # Output in merge-time order (same order as git_prs)
+    for i in range(1, total + 1):
+        print(json.dumps(results[i]))
 
     print(f"Done. Output {total} PRs.", file=sys.stderr)
 
