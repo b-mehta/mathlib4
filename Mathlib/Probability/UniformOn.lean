@@ -7,6 +7,8 @@ module
 
 public import Mathlib.Probability.ConditionalProbability
 public import Mathlib.MeasureTheory.Measure.Count
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.Data.Fintype.BigOperators
 
 /-!
 # Classical probability
@@ -205,5 +207,19 @@ theorem uniformOn_add_compl_eq (u t : Set Ω) (hs : s.Finite) :
       ← uniformOn_disjoint_union (hs.inter_of_left _) (hs.inter_of_left _)
       (disjoint_compl_right.mono inf_le_right inf_le_right)]
   simp [uniformOn_inter_self hs]
+
+variable {ι : Type*} [Fintype ι]
+
+omit [MeasurableSingletonClass Ω] in
+lemma uniformOn_pi [Finite Ω] [MeasurableSingletonClass Ω] {f : ι → Set Ω} :
+    uniformOn (Set.univ.pi f) = Measure.pi fun i ↦ uniformOn (f i) := by
+  refine (MeasureTheory.Measure.pi_eq fun t ht ↦ ?_).symm
+  lift f to ι → Finset Ω
+  · simp [Set.toFinite]
+  lift t to ι → Finset Ω
+  · simp [Set.toFinite]
+  classical
+  simp [← Fintype.coe_piFinset, uniformOn_apply_finset, ← Fintype.piFinset_inter,
+    Fintype.card_piFinset, ENNReal.prod_div_distrib_of_ne_top]
 
 end ProbabilityTheory
