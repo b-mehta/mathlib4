@@ -376,32 +376,35 @@ protected theorem Multipliable.tprod_le_tprod_of_inj₀ {g : κ → α} (e : ι 
     (hf : Multipliable f) (hg : Multipliable g) : tprod f ≤ tprod g :=
   hasProd_le_inj₀ _ he hs h0 h1 hf.hasProd hg.hasProd
 
-theorem prod_le_hasProd₀ [L.NeBot] [L.LeAtTop] (s : Finset ι) (hs : ∀ i, i ∉ s → 1 ≤ f i)
-    (hf : HasProd f a L) : ∏ i ∈ s, f i ≤ a := by
+theorem prod_le_hasProd₀ [L.NeBot] [L.LeAtTop] (s : Finset ι) (h₀ : ∀ i ∈ s, 0 ≤ f i)
+    (h₁ : ∀ i ∉ s, 1 ≤ f i) (hf : HasProd f a L) : ∏ i ∈ s, f i ≤ a := by
   refine ge_of_tendsto hf <| .filter_mono L.le_atTop <| eventually_atTop.2 ?_
-  exact ⟨s, fun _t hst ↦ prod_le_prod_of_subset_of_one_le' hst fun i _ hbs ↦ hs i hbs⟩
+  exact ⟨s, fun _ hst ↦ prod_le_prod_of_subset_of_one_le hst h₀ fun _ _ hx ↦ h₁ _ hx⟩
 
-theorem isLUB_hasProd (h : ∀ i, 1 ≤ f i) (hf : HasProd f a) :
+theorem isLUB_hasProd₀ (h : ∀ i, 1 ≤ f i) (hf : HasProd f a) :
     IsLUB (Set.range fun s ↦ ∏ i ∈ s, f i) a := by
   classical
-  exact isLUB_of_tendsto_atTop (Finset.prod_mono_set_of_one_le' h) hf
+  exact isLUB_of_tendsto_atTop (Finset.prod_mono_set_of_one_le h) hf
 
-@[to_additive]
-theorem le_hasProd [L.NeBot] [L.LeAtTop] (hf : HasProd f a L) (i : ι) (hb : ∀ j, j ≠ i → 1 ≤ f j) :
+theorem le_hasProd₀ [L.NeBot] [L.LeAtTop] (hf : HasProd f a L) (i : ι)
+    (h₀ : 0 ≤ f i) (hb : ∀ j, j ≠ i → 1 ≤ f j) :
     f i ≤ a :=
   calc
     f i = ∏ i ∈ {i}, f i := by rw [prod_singleton]
-    _ ≤ a := prod_le_hasProd _ (by simpa) hf
+    _ ≤ a := prod_le_hasProd₀ _ (by simpa) (by simpa) hf
 
-@[to_additive]
-theorem lt_hasProd [L.NeBot] [L.LeAtTop] [MulRightStrictMono α] (hf : HasProd f a L) (i : ι)
-    (hi : ∀ (j : ι), j ≠ i → 1 ≤ f j) (j : ι) (hij : j ≠ i) (hj : 1 < f j) :
+theorem lt_hasProd₀ [L.NeBot] [L.LeAtTop] [MulRightStrictMono α] (hf : HasProd f a L) (i : ι)
+    (hi : ∀ (j : ι), j ≠ i → 1 ≤ f j) (hi' : 0 < f i) (j : ι) (hij : j ≠ i) (hj : 1 < f j) :
     f i < a := by
   classical
   calc
-    f i < f j * f i := lt_mul_of_one_lt_left' (f i) hj
+    f i < f j * f i := lt_mul_of_one_lt_left hi' hj
     _ = ∏ k ∈ {j, i}, f k := by rw [Finset.prod_pair hij]
-    _ ≤ a := prod_le_hasProd _ (fun k hk ↦ hi k (hk ∘ mem_insert_of_mem ∘ mem_singleton.mpr)) hf
+    _ ≤ a := prod_le_hasProd₀ _
+      (by simp; refine ⟨by grw [← hj]; simp, hi'.le⟩)
+      (fun k hk ↦ hi k (hk ∘ mem_insert_of_mem ∘ mem_singleton.mpr)) hf
+
+#exit
 
 @[to_additive]
 protected theorem Multipliable.prod_le_tprod [L.NeBot] [L.LeAtTop] {f : ι → α} (s : Finset ι)
