@@ -1,0 +1,29 @@
+name: lu-det-bench
+on:
+  push:
+    branches: [lu-det-bench]
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl -sSf https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: get cache
+        run: |
+          lake exe cache get
+      - name: bench
+        run: |
+          set -o pipefail
+          for round in 1 2 3 4; do
+            for v in A B; do
+              cp "bench/LUDet_$v.lean" Mathlib/Tactic/LUDet.lean
+              lake build Mathlib.Tactic.LUDet
+              lake env lean bench/Bench24.lean 2>&1 | grep "took" | sed "s/^/[$v one r$round] /"
+              lake env lean bench/Bench24Swaps.lean 2>&1 | grep "took" | sed "s/^/[$v many r$round] /"
+            done
+          done
