@@ -44,46 +44,32 @@ namespace Mathlib.Tactic.LUDet
 `L`, an upper triangular `U` and a list of row swaps such that `L * U` is `A` with those
 swaps applied. A zero pivot gets swapped with a later row when possible; when the rest
 of the column is zero too, the pivot stays zero and the matrix is singular. -/
-def luDecompose (n : ℕ) (A : Array ℚ) : Array ℚ × Array ℚ × List (ℕ × ℕ) :=
-  Id.run do
-  let idx (i j : ℕ) : ℕ := n * i + j
+def luDecompose {n : ℕ} (A : Vector (Vector ℚ n) n) :
+    Vector (Vector ℚ n) n × Vector (Vector ℚ n) n × List (ℕ × ℕ) := Id.run do
   let mut W := A
-  let mut L : Array ℚ := .replicate (n * n) 0
-  let mut swaps : List (ℕ × ℕ) := []
-  for i in [0:n] do
-    L := L.set! (idx i i) 1
-  for k in [0:n] do
-    if W[idx k k]! = 0 then
-      if let some p := (List.range n).find? fun p ↦ decide (k < p ∧ W[idx p k]! ≠ 0) then
-        swaps := swaps.concat (k, p)
-        for j in [0:n] do
-          let t := W[idx k j]!
-          W := (W.set! (idx k j) W[idx p j]!).set! (idx p j) t
-        for j in [0:k] do
-          let t := L[idx k j]!
-          L := (L.set! (idx k j) L[idx p j]!).set! (idx p j) t
-    let pivot := W[idx k k]!
+  let mut L : Vector (Vector ℚ n) n := .replicate n (.replicate n 0)
+  let mut swaps : Array (ℕ × ℕ) := #[]
+  for h : k in [0:n] do
+    have hk : k < n := h.upper
+    if W[k][k] = 0 then
+      if let some p := (List.finRange n).find? fun p ↦ decide (k < p.val ∧ W[p][k] ≠ 0) then
+        swaps := swaps.push (k, p.val)
+        W := W.swap k p.val
+        -- before step `k` the multipliers sit in columns below `k`, so whole rows swap
+        L := L.swap k p.val
+    let pivot := W[k][k]
     unless pivot = 0 do
-      for i in [k+1:n] do
-        let f := W[idx i k]! / pivot
-        L := L.set! (idx i k) f
-        for j in [k:n] do
-          W := W.set! (idx i j) (W[idx i j]! - f * W[idx k j]!)
-  return (L, W, swaps)
-
-/-- Build a `List $α` literal from an array of quoted entries. -/
-def listLit {u : Level} {α : Q(Type u)} (xs : Array Q($α)) : Q(List $α) :=
-  xs.foldr (fun x acc ↦ q($x :: $acc)) q([])
-
-/-- Build a `List (List ℚ)` literal from rows of quoted entries. -/
-def rowsLit (rows : Array (Array Q(ℚ))) : Q(List (List ℚ)) :=
-  listLit (rows.map listLit)
-
-/-- Build a rational literal in `mkRat` shape. -/
-def ratLit (x : ℚ) : Q(ℚ) :=
-  have n : Q(ℤ) := toExpr x.num
-  have d : Q(ℕ) := toExpr x.den
-  q(mkRat $n $d)
+      for h' : i in [k+1:n] do
+        have hi : i < n := h'.upper
+        let f := W[i][k] / pivot
+        L := L.set i (L[i].set k f)
+        for h'' : j in [k:n] do
+          have hj : j < n := h''.upper
+          W := W.set i (W[i].set j (W[i][j] - f * W[k][j]))
+  for h : i in [0:n] do
+    have hi : i < n := h.upper
+    L := L.set i (L[i].set i 1)
+  return (L, W, swaps.toList)
 
 /-- The `norm_num` evaluation of a rational numeral `e : K`: its value, its literal in
 `mkRat` shape, the literal's cast into `K`, and a proof that `e` equals the cast. -/
@@ -164,6 +150,11 @@ def evalEntry {u : Level} (K : Q(Type u)) (_fieldInst : Q(Field $K))
   return ⟨v, q(mkRat $nE $dE), q(((mkRat $nE $dE : ℚ) : $K)),
     q(LUDet.eq_ratCast_of_isRat $prf)⟩
 
+/-- Reinterpret `a` as a vector of length `n`; the matrix shape guard. -/
+def toVectorOfLen {α : Type} (n : ℕ) (a : Array α) : MetaM (Vector α n) := do
+  if h : a.size = n then return a.toVector.cast h
+  else throwError "lu_det: matrix is not a `!![...]` literal"
+
 /-- Prove a goal of the form `Matrix.det !![...] = d` by handing the kernel an LU
 certificate. -/
 def luDetTactic (g : MVarId) : MetaM Unit := do
@@ -190,34 +181,35 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   let (outerPairs, outerLast) ← peelVec q(Fin $n → $K) rowsVec
   let outerPairs := outerPairs.toArray
   let rowPeels ← outerPairs.mapM fun (rvec, _) ↦ peelVec K rvec
-  unless outerPairs.size == dim && rowPeels.all (·.1.length == dim) do
-    throwError "lu_det: matrix is not a `!![...]` literal"
   -- each entry becomes its value together with the pieces of `hA`: the `mkRat` literal
   -- for the checkers, its cast into `K`, and the norm_num proof the entry equals it
   let entryRows : Array (Array (Entry K)) ← rowPeels.mapIdxM fun i (pairs, _) ↦
     pairs.toArray.mapIdxM fun j (x, tail) ↦ do
       return ⟨x, tail, ← evalEntry K _fieldInst _charZeroInst x m!"matrix entry ({i}, {j})"⟩
-  let vals := (entryRows.map (·.map (·.res.val))).flatten
+  let entryRows : Vector (Vector (Entry K) dim) dim ←
+    toVectorOfLen dim (← entryRows.mapM (toVectorOfLen dim))
+  let vals := entryRows.map (·.map (·.res.val))
   let dres ← evalEntry K _fieldInst _charZeroInst d m!"the right-hand side"
   have dqE : Q(ℚ) := dres.lit
-  let (lVals, uVals, swaps) := luDecompose dim vals
+  let (lVals, uVals, swaps) := luDecompose vals
   let sign : ℚ := if swaps.length % 2 = 0 then 1 else -1
   -- `L` has unit diagonal, so the determinant is the sign times the `U` diagonal product
-  let detVal := (List.range dim).foldl (fun acc i ↦ acc * uVals[dim * i + i]!) sign
+  let detVal := (List.finRange dim).foldl (fun acc i ↦ acc * uVals[i][i]) sign
   unless detVal = dres.val do
     throwError "lu_det: the determinant is {detVal}, but the goal claims {dres.val}"
   -- both factors are emitted as staircases: row `i` keeps only its first `i + 1`
   -- entries, and the missing ones mean `0`
-  have lE : Q(List (List ℚ)) := rowsLit <| .ofFn fun i : Fin dim ↦
-    .ofFn fun j : Fin (i.val + 1) ↦ ratLit lVals[dim * i.val + j.val]!
+  have lE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
+    List.ofFn fun j : Fin (i.val + 1) ↦ lVals[i][j.val]
   -- `V` is `Uᵀ`, so every entry of the product is a dot product of two rows
-  have vE : Q(List (List ℚ)) := rowsLit <| .ofFn fun i : Fin dim ↦
-    .ofFn fun j : Fin (i.val + 1) ↦ ratLit uVals[dim * j.val + i.val]!
+  have vE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
+    List.ofFn fun j : Fin (i.val + 1) ↦ uVals[j.val][i.val]
   have swapsE : Q(List (ℕ × ℕ)) := toExpr swaps
   -- the checkers work on the `mkRat` literals; `hA` relates the goal's literal to their
   -- casts, one lemma application per cons
-  have aE : Q(List (List ℚ)) := rowsLit (entryRows.map (·.map (·.res.lit)))
-  let rowData := (entryRows.zip rowPeels).map fun (row, _, last) ↦ (row.toList, last)
+  let aRowLits ← entryRows.toList.mapM fun row ↦ mkListLit q(ℚ) (row.toList.map (·.res.lit))
+  have aE : Q(List (List ℚ)) := ← mkListLit q(List ℚ) aRowLits
+  let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, last) ↦ (row.toList, last)
   let (_, hAExpr) := rowsOfFnProof n outerPairs outerLast rowData
   have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
       = List.map (List.map Rat.cast) $aE) := hAExpr
