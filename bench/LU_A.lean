@@ -36,9 +36,8 @@ The kernel evaluates everything in this section while checking a certificate. -/
 @[expose] public section
 
 /-- The dot product of the common prefix of two rows. -/
-def dot : List ℚ → List ℚ → ℚ
-  | x :: xs, y :: ys => x * y + dot xs ys
-  | _, _ => 0
+def dot (xs ys : List ℚ) : ℚ :=
+  (zipWith (· * ·) xs ys).sum
 
 /-- Dotting `lr` with each row of `vRows` gives exactly the row `ar`. -/
 def rowMulEq (lr : List ℚ) (vRows : List (List ℚ)) (ar : List ℚ) : Bool :=
@@ -110,16 +109,17 @@ theorem isLowerTriangular_toMatrix {n : ℕ} {rows : List (List ℚ)}
 /-- `dot` as a `Finset.range` sum, padded with zeros up to `n`. -/
 theorem dot_eq_sum {xs ys : List ℚ} {n : ℕ} (hx : xs.length ≤ n) (hy : ys.length ≤ n) :
     dot xs ys = ∑ k ∈ Finset.range n, xs[k]?.getD 0 * ys[k]?.getD 0 := by
+  rw [dot]
   induction n generalizing xs ys with
-  | zero => cases xs <;> simp_all [dot]
+  | zero => cases xs <;> simp_all
   | succ m ih =>
     cases xs with
-    | nil => simp [dot]
+    | nil => simp
     | cons x xs =>
       cases ys with
-      | nil => simp [dot]
+      | nil => simp
       | cons y ys =>
-        rw [dot]
+        rw [zipWith_cons_cons]
         grind [Finset.sum_range_succ']
 
 /-- Turn one `Matrix.vecCons` of a `!![...]` literal into one `List.cons`. The function
