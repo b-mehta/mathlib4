@@ -19,6 +19,8 @@ jobs:
       - name: bench
         run: |
           set -o pipefail
+          lake build Mathlib.Tactic.LUDet
+          lake env lean MathlibTest/LUDet.lean
           for round in 1 2 3 4; do
             for v in A B; do
               cp "bench/LUDet_$v.lean" Mathlib/Tactic/LUDet.lean

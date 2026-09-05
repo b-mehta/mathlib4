@@ -40,36 +40,32 @@ open Lean Elab Meta Qq
 
 namespace Mathlib.Tactic.LUDet
 
-/-- Gaussian elimination on the row-major `n × n` matrix `A`: a unit lower triangular
-`L`, an upper triangular `U` and a list of row swaps such that `L * U` is `A` with those
-swaps applied. A zero pivot gets swapped with a later row when possible; when the rest
-of the column is zero too, the pivot stays zero and the matrix is singular. -/
+/-- Gaussian elimination on `A`, storing the strict lower triangle of `L` below the
+diagonal and `U` on and above it. The diagonal of `L` is implicitly one. A zero pivot
+gets swapped with a later row when possible; when the rest of the column is zero too,
+the pivot stays zero and the matrix is singular. -/
 def luDecompose {n : ℕ} (A : Vector (Vector ℚ n) n) :
-    Vector (Vector ℚ n) n × Vector (Vector ℚ n) n × List (ℕ × ℕ) := Id.run do
-  let mut W := A
-  let mut L : Vector (Vector ℚ n) n := .replicate n (.replicate n 0)
+    Vector (Vector ℚ n) n × List (ℕ × ℕ) := Id.run do
+  let mut LU := A
   let mut swaps : Array (ℕ × ℕ) := #[]
   for h : k in [0:n] do
     have hk : k < n := h.upper
-    if W[k][k] = 0 then
-      if let some p := (List.finRange n).find? fun p ↦ decide (k < p.val ∧ W[p][k] ≠ 0) then
+    if LU[k][k] = 0 then
+      if let some p := (List.finRange n).find? fun p ↦ decide (k < p.val ∧ LU[p][k] ≠ 0) then
         swaps := swaps.push (k, p.val)
-        W := W.swap k p.val
-        -- before step `k` the multipliers sit in columns below `k`, so whole rows swap
-        L := L.swap k p.val
-    let pivot := W[k][k]
+        LU := LU.swap k p.val
+    let pivotRow := LU[k]
+    let pivot := pivotRow[k]
     unless pivot = 0 do
       for h' : i in [k+1:n] do
         have hi : i < n := h'.upper
-        let f := W[i][k] / pivot
-        L := L.set i (L[i].set k f)
-        for h'' : j in [k:n] do
+        let f := LU[i][k] / pivot
+        let mut row := LU[i].set k f
+        for h'' : j in [k+1:n] do
           have hj : j < n := h''.upper
-          W := W.set i (W[i].set j (W[i][j] - f * W[k][j]))
-  for h : i in [0:n] do
-    have hi : i < n := h.upper
-    L := L.set i (L[i].set i 1)
-  return (L, W, swaps.toList)
+          row := row.set j (row[j] - f * pivotRow[j])
+        LU := LU.set i row
+  return (LU, swaps.toList)
 
 /-- The `norm_num` evaluation of a rational numeral `e : K`: its value, its literal in
 `mkRat` shape, the literal's cast into `K`, and a proof that `e` equals the cast. -/
@@ -98,42 +94,45 @@ partial def peelVec {u : Level} (α : Q(Type u)) (e : Expr) :
     return ((x, xs) :: pairs, last)
   | _ => return ([], e')
 
-/-- For one row `v` of the literal, build the list `xs` of the casts of its entries
-together with a proof that `List.ofFn v = xs`, one `LUDet.list_ofFn_vecCons` (at
-`g := id`) per entry. -/
-def rowOfFnProof {u : Level} {K : Q(Type u)} (entries : List (Entry K)) (finalTail : Expr) :
-    Q(List $K) × Expr :=
+/-- For one row `v` of the literal, build the list `xs` of its rational entries
+together with a proof that `List.ofFn v = xs.map Rat.cast`, one
+`LUDet.list_ofFn_vecCons` application per entry. -/
+def rowOfFnProof {u : Level} {K : Q(Type u)} (_fieldInst : Q(Field $K))
+    (entries : List (Entry K)) (finalTail : Expr) :
+    Q(List ℚ) × Expr :=
   have tail0 : Q(Fin 0 → $K) := finalTail
-  let base : Q(List $K) × Expr × ℕ := (q([]), q(List.ofFn_zero (f := $tail0)), 0)
+  let base : Q(List ℚ) × Expr × ℕ := (q([]), q(List.ofFn_zero (f := $tail0)), 0)
   let (lst, prf, _) := entries.foldr
-    (fun e (acc : Q(List $K) × Expr × ℕ) ↦
+    (fun e (acc : Q(List ℚ) × Expr × ℕ) ↦
       let (lst, prfE, m) := acc
       have x : Q($K) := e.x
-      have y : Q($K) := e.res.cast
-      have hy : Q($x = $y) := e.res.pf
+      have y : Q(ℚ) := e.res.lit
+      have yK : Q($K) := e.res.cast
+      have hy : Q($x = $yK) := e.res.pf
       have m' : Q(ℕ) := mkRawNatLit m
       have tail : Q(Fin $m' → $K) := e.tail
-      have prf : Q(List.ofFn $tail = $lst) := prfE
+      have prf : Q(List.ofFn $tail = List.map Rat.cast $lst) := prfE
       (q($y :: $lst), q(LUDet.list_ofFn_vecCons id $x $tail $hy $prf), m + 1))
     base
   (lst, prf)
 
-/-- Same as `rowOfFnProof`, one level up: the list of all the rows, with a proof that
-it reflects the whole literal, via `LUDet.list_ofFn_vecCons` at `g := List.ofFn`. -/
-def rowsOfFnProof {u : Level} {K : Q(Type u)} (n : Q(ℕ))
+/-- Same as `rowOfFnProof`, one level up: return the rational matrix together with a
+proof that mapping `Rat.cast` over it reflects the whole literal. -/
+def rowsOfFnProof {u : Level} {K : Q(Type u)} (_fieldInst : Q(Field $K)) (n : Q(ℕ))
     (outerPairs : Array (Q(Fin $n → $K) × Expr)) (outerLast : Expr)
     (rowData : Array (List (Entry K) × Expr)) :
-    Q(List (List $K)) × Expr := Id.run do
-  let mut lst : Q(List (List $K)) := q([])
+    Q(List (List ℚ)) × Expr := Id.run do
+  let mut lst : Q(List (List ℚ)) := q([])
   have last0 : Q(Fin 0 → Fin $n → $K) := outerLast
   let mut prfE : Expr := q(List.ofFn_zero (f := fun i ↦ List.ofFn ($last0 i)))
   let mut m : ℕ := 0
   for ((rvec, rtailE), entries, last) in (outerPairs.zip rowData).reverse do
-    let (xs, rprfE) := rowOfFnProof entries last
+    let (xs, rprfE) := rowOfFnProof _fieldInst entries last
     have m' : Q(ℕ) := mkRawNatLit m
     have rtail : Q(Fin $m' → Fin $n → $K) := rtailE
-    have rprf : Q(List.ofFn $rvec = $xs) := rprfE
-    have prf : Q(List.ofFn (fun i ↦ List.ofFn ($rtail i)) = $lst) := prfE
+    have rprf : Q(List.ofFn $rvec = List.map Rat.cast $xs) := rprfE
+    have prf : Q(List.ofFn (fun i ↦ List.ofFn ($rtail i))
+        = List.map (List.map Rat.cast) $lst) := prfE
     prfE := q(LUDet.list_ofFn_vecCons List.ofFn $rvec $rtail $rprf $prf)
     lst := q($xs :: $lst)
     m := m + 1
@@ -191,26 +190,24 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   let vals := entryRows.map (·.map (·.res.val))
   let dres ← evalEntry K _fieldInst _charZeroInst d m!"the right-hand side"
   have dqE : Q(ℚ) := dres.lit
-  let (lVals, uVals, swaps) := luDecompose vals
+  let (luVals, swaps) := luDecompose vals
   let sign : ℚ := if swaps.length % 2 = 0 then 1 else -1
   -- `L` has unit diagonal, so the determinant is the sign times the `U` diagonal product
-  let detVal := (List.finRange dim).foldl (fun acc i ↦ acc * uVals[i][i]) sign
+  let detVal := (List.finRange dim).foldl (fun acc i ↦ acc * luVals[i][i]) sign
   unless detVal = dres.val do
     throwError "lu_det: the determinant is {detVal}, but the goal claims {dres.val}"
   -- both factors are emitted as staircases: row `i` keeps only its first `i + 1`
   -- entries, and the missing ones mean `0`
   have lE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
-    List.ofFn fun j : Fin (i.val + 1) ↦ lVals[i][j.val]
+    List.ofFn fun j : Fin (i.val + 1) ↦ if i.val = j.val then 1 else luVals[i][j.val]
   -- `V` is `Uᵀ`, so every entry of the product is a dot product of two rows
   have vE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
-    List.ofFn fun j : Fin (i.val + 1) ↦ uVals[j.val][i.val]
+    List.ofFn fun j : Fin (i.val + 1) ↦ luVals[j.val][i.val]
   have swapsE : Q(List (ℕ × ℕ)) := toExpr swaps
   -- the checkers work on the `mkRat` literals; `hA` relates the goal's literal to their
   -- casts, one lemma application per cons
-  let aRowLits ← entryRows.toList.mapM fun row ↦ mkListLit q(ℚ) (row.toList.map (·.res.lit))
-  have aE : Q(List (List ℚ)) := ← mkListLit q(List ℚ) aRowLits
   let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, last) ↦ (row.toList, last)
-  let (_, hAExpr) := rowsOfFnProof n outerPairs outerLast rowData
+  let (aE, hAExpr) := rowsOfFnProof _fieldInst n outerPairs outerLast rowData
   have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
       = List.map (List.map Rat.cast) $aE) := hAExpr
   have hdK : Q((($dqE : ℚ) : $K) = $d) := (← mkEqSymm dres.pf)
