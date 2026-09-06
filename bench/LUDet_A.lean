@@ -198,7 +198,7 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   have hmul : Q(LUDet.checkMul $vE $lE (LUDet.applySwaps $swapsE $aE)) :=
     reflBoolTrue
   have hd : Q(((LUDet.diagProd $lE) * LUDet.diagProd $vE
-      == bif ((List.length $swapsE) % 2).beq 1 then -$dqE else $dqE)) := reflBoolTrue
+      == if Even (List.length $swapsE) then $dqE else -$dqE)) := reflBoolTrue
   g.assign
     q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hswaps $hsL $hsV $hmul $hd
       $hdK)
