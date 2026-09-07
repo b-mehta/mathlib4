@@ -140,9 +140,9 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
   let_expr Matrix.det ixType _ _ K _ M := lhs
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
-  let ⟨_, ixType⟩ ← getLevelQ' (← whnfR ixType)
-  let ~q(Fin $nE) := ixType
+  let_expr Fin nE := (← whnfR ixType)
     | throwError "lu_det: the matrix is not indexed by `Fin n`"
+  have nE : Q(ℕ) := nE
   let some n ← getNatValue? nE
     | throwError "lu_det: matrix dimension is not a numeral"
   let u ← getDecLevel K
