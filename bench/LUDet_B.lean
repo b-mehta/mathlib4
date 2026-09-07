@@ -140,10 +140,8 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
   let ⟨u, K, lhs⟩ ← inferTypeQ' lhs
   have d : Q($K) := d
-  let ~q(@Matrix.det $ixType _ _ $K $_ringInst $M) := lhs
+  let ~q(@Matrix.det (Fin $nE) _ _ _ $_ringInst $M) := lhs
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
-  let ~q(Fin $nE) := (← whnfR ixType)
-    | throwError "lu_det: the matrix is not indexed by `Fin n`"
   let some n ← getNatValue? nE
     | throwError "lu_det: matrix dimension is not a numeral"
   let fieldInst : Q(Field $K) ← synthInstanceQ q(Field $K)
