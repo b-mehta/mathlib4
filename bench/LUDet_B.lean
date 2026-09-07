@@ -63,17 +63,13 @@ def luDecompose {n : ℕ} (A : Vector (Vector ℚ n) n) :
         LU := LU.set i row
   return (LU, swaps.toList)
 
-/-- The value and certificate obtained by evaluating `e` as a rational numeral. -/
-structure EntryResult {u : Level} (K : Q(Type u)) (e : Q($K)) where
-  val : ℚ
-  lit : Q(ℚ)
-  cast : Q($K)
-  pf : Q($e = $cast)
-
 /-- A matrix entry and its rational evaluation. -/
 structure Entry {u : Level} (K : Q(Type u)) where
   x : Q($K)
-  res : EntryResult K x
+  val : ℚ
+  lit : Q(ℚ)
+  cast : Q($K)
+  pf : Q($x = $cast)
 
 /-- Builds rational entries and proves that casting them gives the reflected row. -/
 def rowOfFnProof {u : Level} {K : Q(Type u)} (fieldInst : Q(Field $K))
@@ -86,9 +82,9 @@ def rowOfFnProof {u : Level} {K : Q(Type u)} (fieldInst : Q(Field $K))
     (fun e acc ↦
       let (lst, prfE, tailE, m) := acc
       have x : Q($K) := e.x
-      have y : Q(ℚ) := e.res.lit
-      have yK : Q($K) := e.res.cast
-      have hy : Q($x = $yK) := e.res.pf
+      have y : Q(ℚ) := e.lit
+      have yK : Q($K) := e.cast
+      have hy : Q($x = $yK) := e.pf
       have m' : Q(ℕ) := mkRawNatLit m
       have tail : Q(Fin $m' → $K) := tailE
       have prf : Q(List.ofFn $tail = List.map Rat.cast $lst) := prfE
@@ -123,12 +119,12 @@ def rowsOfFnProof {u : Level} {K : Q(Type u)} (fieldInst : Q(Field $K)) (n : Q(�
 /-- Evaluates `e` as a rational numeral, using `what` to identify an invalid expression. -/
 def evalEntry {u : Level} (K : Q(Type u)) (fieldInst : Q(Field $K))
     (_charZeroInst : Q(CharZero $K)) (e : Q($K)) (what : MessageData) :
-    MetaM (EntryResult K e) := do
+    MetaM (Entry K) := do
   let r ← try Mathlib.Meta.NormNum.derive (u := u) (α := K) e
     catch _ => throwError "lu_det: {what} is not a rational numeral: {e}"
   let some ⟨v, nE, dE, prf⟩ := r.toRat' q(inferInstance)
     | throwError "lu_det: {what} is not a rational numeral: {e}"
-  return ⟨v, q(mkRat $nE $dE), q((mkRat $nE $dE : $K)),
+  return ⟨e, v, q(mkRat $nE $dE), q((mkRat $nE $dE : $K)),
     q(LUDet.eq_ratCast_of_isRat $prf)⟩
 
 /-- Converts `a` to a vector of length `n`, reporting an invalid matrix literal on mismatch. -/
@@ -161,11 +157,11 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   let outerRows := outerRows.toArray
   let rowPeels ← outerRows.mapM fun row ↦ Matrix.matchVecConsPrefix n row
   let entryRows : Array (Array (Entry K)) ← rowPeels.mapIdxM fun i (entries, _, _) ↦
-    entries.toArray.mapIdxM fun j x ↦ do
-      return ⟨x, ← evalEntry K fieldInst charZeroInst x m!"matrix entry ({i}, {j})"⟩
+    entries.toArray.mapIdxM fun j x ↦
+      evalEntry K fieldInst charZeroInst x m!"matrix entry ({i}, {j})"
   let entryRows : Vector (Vector (Entry K) dim) dim ←
     toVectorOfLen dim (← entryRows.mapM (toVectorOfLen dim))
-  let vals := entryRows.map (·.map (·.res.val))
+  let vals := entryRows.map (·.map (·.val))
   let dres ← evalEntry K fieldInst charZeroInst d m!"the right-hand side"
   have dqE : Q(ℚ) := dres.lit
   let (luVals, swaps) := luDecompose vals
