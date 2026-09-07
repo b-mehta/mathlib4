@@ -192,16 +192,9 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
       = List.map (List.map Rat.cast) $aE) := hAExpr
   have hdK : Q($d = ($dqE : $K)) := dres.pf
-  have hswaps : Q(List.all $swapsE fun p ↦ p.1 < p.2 && p.2 < $n) := reflBoolTrue
-  have hsL : Q(LUDet.checkStair $n $lE) := reflBoolTrue
-  have hsV : Q(LUDet.checkStair $n $vE) := reflBoolTrue
-  have hmul : Q(LUDet.checkMul $vE $lE (LUDet.applySwaps $swapsE $aE)) :=
-    reflBoolTrue
-  have hd : Q(((LUDet.diagProd $lE) * LUDet.diagProd $vE
-      == if Even (List.length $swapsE) then $dqE else -$dqE)) := reflBoolTrue
+  have hcert : Q(LUDet.checkCertificate $n $aE $lE $vE $swapsE $dqE) := reflBoolTrue
   g.assign
-    q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hswaps $hsL $hsV $hmul $hd
-      $hdK)
+    q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hcert $hdK)
 
 /--
 `lu_det` proves goals of the form `Matrix.det !![...] = d`, where the matrix lives in a

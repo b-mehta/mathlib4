@@ -70,61 +70,52 @@ structure EntryResult {u : Level} (K : Q(Type u)) (e : Q($K)) where
   cast : Q($K)
   pf : Q($e = $cast)
 
-/-- A matrix entry, its remaining `Matrix.vecCons` tail, and its rational evaluation. -/
+/-- A matrix entry and its rational evaluation. -/
 structure Entry {u : Level} (K : Q(Type u)) where
   x : Q($K)
-  tail : Expr
   res : EntryResult K x
-
-/-- Decomposes a `Matrix.vecCons` chain into entries paired with their remaining tails,
-followed by the final tail. -/
-partial def peelVec {u : Level} (α : Q(Type u)) (e : Expr) :
-    MetaM (List (Q($α) × Expr) × Expr) := do
-  let e' ← whnfR e
-  match_expr e' with
-  | Matrix.vecCons _ _ x xs =>
-    let (pairs, last) ← peelVec α xs
-    have x : Q($α) := x
-    return ((x, xs) :: pairs, last)
-  | _ => return ([], e')
 
 /-- Builds rational entries and proves that casting them gives the reflected row. -/
 def rowOfFnProof {u : Level} {K : Q(Type u)} (fieldInst : Q(Field $K))
     (entries : List (Entry K)) (finalTail : Expr) :
     Q(List ℚ) × Expr :=
   have tail0 : Q(Fin 0 → $K) := finalTail
-  let base : Q(List ℚ) × Expr × ℕ := (q([]), q(List.ofFn_zero (f := $tail0)), 0)
-  let (lst, prf, _) := entries.foldr
+  let base : Q(List ℚ) × Expr × Expr × ℕ :=
+    (q([]), q(List.ofFn_zero (f := $tail0)), tail0, 0)
+  let (lst, prf, _, _) := entries.foldr
     (fun e acc ↦
-      let (lst, prfE, m) := acc
+      let (lst, prfE, tailE, m) := acc
       have x : Q($K) := e.x
       have y : Q(ℚ) := e.res.lit
       have yK : Q($K) := e.res.cast
       have hy : Q($x = $yK) := e.res.pf
       have m' : Q(ℕ) := mkRawNatLit m
-      have tail : Q(Fin $m' → $K) := e.tail
+      have tail : Q(Fin $m' → $K) := tailE
       have prf : Q(List.ofFn $tail = List.map Rat.cast $lst) := prfE
-      (q($y :: $lst), q(LUDet.list_ofFn_vecCons id $x $tail $hy $prf), m + 1))
+      (q($y :: $lst), q(LUDet.list_ofFn_vecCons id $x $tail $hy $prf),
+        q(Matrix.vecCons $x $tail), m + 1))
     base
   (lst, prf)
 
 /-- Builds rational rows and proves that casting their entries gives the reflected matrix. -/
 def rowsOfFnProof {u : Level} {K : Q(Type u)} (fieldInst : Q(Field $K)) (n : Q(ℕ))
-    (outerPairs : Array (Q(Fin $n → $K) × Expr)) (outerLast : Expr)
+    (outerRows : Array Q(Fin $n → $K)) (outerLast : Expr)
     (rowData : Array (List (Entry K) × Expr)) :
     Q(List (List ℚ)) × Expr := Id.run do
   let mut lst : Q(List (List ℚ)) := q([])
   have last0 : Q(Fin 0 → Fin $n → $K) := outerLast
   let mut prfE : Expr := q(List.ofFn_zero (f := fun i ↦ List.ofFn ($last0 i)))
+  let mut tailE : Expr := outerLast
   let mut m : ℕ := 0
-  for ((rvec, rtailE), entries, last) in (outerPairs.zip rowData).reverse do
+  for (rvec, entries, last) in (outerRows.zip rowData).reverse do
     let (xs, rprfE) := rowOfFnProof fieldInst entries last
     have m' : Q(ℕ) := mkRawNatLit m
-    have rtail : Q(Fin $m' → Fin $n → $K) := rtailE
+    have rtail : Q(Fin $m' → Fin $n → $K) := tailE
     have rprf : Q(List.ofFn $rvec = List.map Rat.cast $xs) := rprfE
     have prf : Q(List.ofFn (fun i ↦ List.ofFn ($rtail i))
         = List.map (List.map Rat.cast) $lst) := prfE
     prfE := q(LUDet.list_ofFn_vecCons List.ofFn $rvec $rtail $rprf $prf)
+    tailE := q(Matrix.vecCons $rvec $rtail)
     lst := q($xs :: $lst)
     m := m + 1
   return (lst, prfE)
@@ -166,12 +157,12 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   have d : Q($K) := d
   let ~q(Matrix.of $rowsVec) := M
     | throwError "lu_det: matrix is not a `!![...]` literal"
-  let (outerPairs, outerLast) ← peelVec q(Fin $n → $K) rowsVec
-  let outerPairs := outerPairs.toArray
-  let rowPeels ← outerPairs.mapM fun (rvec, _) ↦ peelVec K rvec
-  let entryRows : Array (Array (Entry K)) ← rowPeels.mapIdxM fun i (pairs, _) ↦
-    pairs.toArray.mapIdxM fun j (x, tail) ↦ do
-      return ⟨x, tail, ← evalEntry K fieldInst charZeroInst x m!"matrix entry ({i}, {j})"⟩
+  let (outerRows, _, outerLast) ← Matrix.matchVecConsPrefix n rowsVec
+  let outerRows := outerRows.toArray
+  let rowPeels ← outerRows.mapM fun row ↦ Matrix.matchVecConsPrefix n row
+  let entryRows : Array (Array (Entry K)) ← rowPeels.mapIdxM fun i (entries, _, _) ↦
+    entries.toArray.mapIdxM fun j x ↦ do
+      return ⟨x, ← evalEntry K fieldInst charZeroInst x m!"matrix entry ({i}, {j})"⟩
   let entryRows : Vector (Vector (Entry K) dim) dim ←
     toVectorOfLen dim (← entryRows.mapM (toVectorOfLen dim))
   let vals := entryRows.map (·.map (·.res.val))
@@ -187,8 +178,8 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   have vE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
     List.ofFn fun j : Fin (i.val + 1) ↦ luVals[j.val][i.val]
   have swapsE : Q(List (ℕ × ℕ)) := toExpr swaps
-  let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, last) ↦ (row.toList, last)
-  let (aE, hAExpr) := rowsOfFnProof fieldInst n outerPairs outerLast rowData
+  let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, _, last) ↦ (row.toList, last)
+  let (aE, hAExpr) := rowsOfFnProof fieldInst n outerRows outerLast rowData
   have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
       = List.map (List.map Rat.cast) $aE) := hAExpr
   have hdK : Q($d = ($dqE : $K)) := dres.pf

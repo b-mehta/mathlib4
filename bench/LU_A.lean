@@ -53,6 +53,14 @@ def applySwaps : List (ℕ × ℕ) → List (List ℚ) → List (List ℚ)
   | [], rows => rows
   | (i, j) :: s, rows => applySwaps s (swapRows i j rows)
 
+/-- Checks an LU certificate over `ℚ`. -/
+def checkCertificate (n : ℕ) (aRows lRows vRows : List (List ℚ))
+    (swaps : List (ℕ × ℕ)) (dq : ℚ) : Bool :=
+  swaps.all (fun p ↦ p.1 < p.2 && p.2 < n) &&
+    (checkStair n lRows && (checkStair n vRows &&
+      (checkMul vRows lRows (applySwaps swaps aRows) &&
+        diagProd lRows * diagProd vRows == if Even swaps.length then dq else -dq)))
+
 end
 
 /-! ### Correctness -/
@@ -224,12 +232,11 @@ represent the two staircase factors. -/
 public theorem det_eq_of_lu (M : Matrix (Fin n) (Fin n) K)
     (aRows lRows vRows : List (List ℚ)) (swaps : List (ℕ × ℕ)) (dq : ℚ) (d : K)
     (hA : (ofFn fun i ↦ ofFn fun j ↦ M i j) = aRows.map (List.map Rat.cast))
-    (hswaps : swaps.all fun p ↦ p.1 < p.2 && p.2 < n)
-    (hsL : checkStair n lRows) (hsV : checkStair n vRows)
-    (hmul : checkMul vRows lRows (applySwaps swaps aRows))
-    (hd : diagProd lRows * diagProd vRows == if Even swaps.length then dq else -dq)
+    (hcert : checkCertificate n aRows lRows vRows swaps dq)
     (hdK : d = (dq : K)) :
     M.det = d := by
+  simp only [checkCertificate, Bool.and_eq_true] at hcert
+  obtain ⟨hswaps, hsL, hsV, hmul, hd⟩ := hcert
   have hsgn : (-1) ^ swaps.length * (diagProd lRows * diagProd vRows) = dq := by
     rcases Nat.even_or_odd swaps.length with h | h <;> simp_all
   have hAlen : aRows.length = n := by simpa using (congrArg List.length hA).symm
