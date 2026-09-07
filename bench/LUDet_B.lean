@@ -176,10 +176,12 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   have swapsE : Q(List (ℕ × ℕ)) := toExpr swaps
   let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, _, last) ↦ (row.toList, last)
   let (aE, hAExpr) := rowsOfFnProof fieldInst n outerRows outerLast rowData
-  have hA : Q((List.ofFn fun i ↦ List.ofFn fun j ↦ $M i j) = List.map (List.map (↑)) $aE) := hAExpr
+  have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
+      = List.map (List.map Rat.cast) $aE) := hAExpr
   have hdK : Q($d = ($dqE : $K)) := dres.pf
   have hcert : Q(LUDet.checkCertificate $n $aE $lE $vE $swapsE $dqE) := reflBoolTrue
-  g.assign q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hcert $hdK)
+  g.assign
+    q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hcert $hdK)
 
 /--
 `lu_det` proves goals of the form `Matrix.det !![...] = d`, where the matrix lives in a
