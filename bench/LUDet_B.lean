@@ -138,7 +138,7 @@ def luDetTactic (g : MVarId) : MetaM Unit := do
   let tgt : Q(Prop) ← instantiateMVars (← g.getType)
   let ~q($lhs = $d) := tgt
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
-  let ⟨u, K, lhs⟩ ← inferTypeQ lhs
+  let ⟨u, K, lhs⟩ ← inferTypeQ' lhs
   have d : Q($K) := d
   let ~q(@Matrix.det $ixType _ _ $K _ $M) := lhs
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
