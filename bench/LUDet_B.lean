@@ -136,52 +136,47 @@ def toVectorOfLen {α : Type} (n : ℕ) (a : Array α) : MetaM (Vector α n) := 
 values are rational numerals. -/
 def luDetTactic (g : MVarId) : MetaM Unit := do
   let tgt : Q(Prop) ← instantiateMVars (← g.getType)
-  let_expr Eq _ lhs d := tgt
+  let ~q($lhs = $d) := tgt
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
-  let_expr Matrix.det ixType _ _ K _ M := lhs
+  let ⟨u, K, lhs⟩ ← inferTypeQ lhs
+  have d : Q($K) := d
+  let ~q(@Matrix.det $ixType _ _ $K _ $M) := lhs
     | throwError "lu_det: goal is not of the form `Matrix.det M = d`"
-  let_expr Fin n := (← whnfR ixType)
+  let ~q(Fin $nE) := (← whnfR ixType)
     | throwError "lu_det: the matrix is not indexed by `Fin n`"
-  have n : Q(ℕ) := n
-  let some dim ← getNatValue? n
+  let some n ← getNatValue? nE
     | throwError "lu_det: matrix dimension is not a numeral"
-  let u ← getDecLevel K
-  have K : Q(Type u) := K
   let fieldInst : Q(Field $K) ← synthInstanceQ q(Field $K)
   let charZeroInst : Q(CharZero $K) ← synthInstanceQ q(CharZero $K)
-  have M : Q(Matrix (Fin $n) (Fin $n) $K) := M
-  have d : Q($K) := d
   let ~q(Matrix.of $rowsVec) := M
     | throwError "lu_det: matrix is not a `!![...]` literal"
-  let (outerRows, _, outerLast) ← Matrix.matchVecConsPrefix n rowsVec
+  let (outerRows, _, outerLast) ← Matrix.matchVecConsPrefix nE rowsVec
   let outerRows := outerRows.toArray
-  let rowPeels ← outerRows.mapM fun row ↦ Matrix.matchVecConsPrefix n row
+  let rowPeels ← outerRows.mapM fun row ↦ Matrix.matchVecConsPrefix nE row
   let entryRows : Array (Array (Entry K)) ← rowPeels.mapIdxM fun i (entries, _, _) ↦
     entries.toArray.mapIdxM fun j x ↦
       evalEntry K fieldInst charZeroInst x m!"matrix entry ({i}, {j})"
-  let entryRows : Vector (Vector (Entry K) dim) dim ←
-    toVectorOfLen dim (← entryRows.mapM (toVectorOfLen dim))
+  let entryRows : Vector (Vector (Entry K) n) n ←
+    toVectorOfLen n (← entryRows.mapM (toVectorOfLen n))
   let vals := entryRows.map (·.map (·.val))
   let dres ← evalEntry K fieldInst charZeroInst d m!"the right-hand side"
   have dqE : Q(ℚ) := dres.lit
   let (luVals, swaps) := luDecompose vals
   let sign : ℚ := if swaps.length % 2 = 0 then 1 else -1
-  let detVal := (List.finRange dim).foldl (fun acc i ↦ acc * luVals[i][i]) sign
+  let detVal : ℚ := (List.finRange n).foldl (fun acc i ↦ acc * luVals[i][i]) sign
   unless detVal = dres.val do
     throwError "lu_det: the determinant is {detVal}, but the goal claims {dres.val}"
-  have lE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
+  have lE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin n ↦
     List.ofFn fun j : Fin (i.val + 1) ↦ if i.val = j.val then 1 else luVals[i][j.val]
-  have vE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin dim ↦
+  have vE : Q(List (List ℚ)) := toExpr <| List.ofFn fun i : Fin n ↦
     List.ofFn fun j : Fin (i.val + 1) ↦ luVals[j.val][i.val]
   have swapsE : Q(List (ℕ × ℕ)) := toExpr swaps
   let rowData := (entryRows.toArray.zip rowPeels).map fun (row, _, _, last) ↦ (row.toList, last)
-  let (aE, hAExpr) := rowsOfFnProof fieldInst n outerRows outerLast rowData
-  have hA : Q((List.ofFn fun i : Fin $n ↦ List.ofFn fun j : Fin $n ↦ $M i j)
-      = List.map (List.map Rat.cast) $aE) := hAExpr
+  let (aE, hAExpr) := rowsOfFnProof fieldInst nE outerRows outerLast rowData
+  have hA : Q((List.ofFn fun i ↦ List.ofFn fun j ↦ $M i j) = List.map (List.map (↑)) $aE) := hAExpr
   have hdK : Q($d = ($dqE : $K)) := dres.pf
-  have hcert : Q(LUDet.checkCertificate $n $aE $lE $vE $swapsE $dqE) := reflBoolTrue
-  g.assign
-    q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hcert $hdK)
+  have hcert : Q(LUDet.checkCertificate $nE $aE $lE $vE $swapsE $dqE) := reflBoolTrue
+  g.assign q(LUDet.det_eq_of_lu $M $aE $lE $vE $swapsE $dqE $d $hA $hcert $hdK)
 
 /--
 `lu_det` proves goals of the form `Matrix.det !![...] = d`, where the matrix lives in a
