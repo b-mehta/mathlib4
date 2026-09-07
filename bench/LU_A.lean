@@ -28,13 +28,9 @@ def dot : List ℚ → List ℚ → ℚ
   | x :: xs, y :: ys => x * y + dot xs ys
   | _, _ => 0
 
-/-- Checks that `ar` is the list of dot products of `lr` with the rows of `vRows`. -/
-def rowMulEq (lr : List ℚ) (vRows : List (List ℚ)) (ar : List ℚ) : Bool :=
-  all₂ (fun v a ↦ dot lr v = a) vRows ar
-
 /-- Checks the matrix identity represented by `lRows * vRowsᵀ = aRows`. -/
 def checkMul (vRows lRows aRows : List (List ℚ)) : Bool :=
-  all₂ (fun lr ar ↦ rowMulEq lr vRows ar) lRows aRows
+  all₂ (fun lr ar ↦ all₂ (fun v a ↦ dot lr v = a) vRows ar) lRows aRows
 
 /-- Checks that `rows` has `n` rows and row `i` has length `i + 1`. -/
 def checkStair (n : ℕ) (rows : List (List ℚ)) : Bool :=
@@ -97,18 +93,12 @@ end ToMatrix
 
 section CheckerSpecs
 
-variable {lr : List ℚ} {vs : List (List ℚ)} {ar : List ℚ}
-
-/-- `rowMulEq lr vs ar` holds exactly when `ar` lists the corresponding dot products. -/
-theorem rowMulEq_iff :
-    rowMulEq lr vs ar ↔ ar = vs.map fun v ↦ dot lr v := by
-  simp [rowMulEq, eq_comm (a := ar), ← forall₂_eq_eq_eq, forall₂_map_left_iff]
+variable {vs : List (List ℚ)}
 
 /-- `checkMul vs ls as` holds exactly when `as` represents `ls * vsᵀ`. -/
 theorem checkMul_iff {ls as : List (List ℚ)} :
     checkMul vs ls as ↔ as = ls.map fun lr ↦ vs.map fun v ↦ dot lr v := by
-  rw [checkMul, all₂_eq_true, eq_comm, ← forall₂_eq_eq_eq]
-  grind [rowMulEq_iff, forall₂_map_left_iff]
+  simp [checkMul, eq_comm (a := as), ← forall₂_eq_eq_eq, forall₂_map_left_iff]
 
 variable {n : ℕ} {rows : List (List ℚ)}
 
