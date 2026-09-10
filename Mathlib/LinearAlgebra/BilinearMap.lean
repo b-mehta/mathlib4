@@ -627,6 +627,25 @@ end restrictScalarsRange₂
 
 end LinearMap
 
+namespace LinearEquiv
+
+variable {R M₂ M₃ : Type*} [CommSemiring R] [AddCommMonoid M₂] [Module R M₂]
+  [AddCommMonoid M₃] [Module R M₃]
+
+/-- A linear equivalence carries the range of `a • ·` to the range of `a • ·`. -/
+lemma map_range_lsmul (e : M₂ ≃ₗ[R] M₃) (a : R) :
+    (LinearMap.range (LinearMap.lsmul R M₂ a)).map (e : M₂ →ₗ[R] M₃) =
+      LinearMap.range (LinearMap.lsmul R M₃ a) := by
+  ext z
+  simp only [Submodule.mem_map, LinearMap.mem_range, LinearMap.lsmul_apply, LinearEquiv.coe_coe]
+  constructor
+  · rintro ⟨_, ⟨y, rfl⟩, rfl⟩
+    exact ⟨e y, by rw [map_smul]⟩
+  · rintro ⟨w, rfl⟩
+    exact ⟨a • e.symm w, ⟨e.symm w, rfl⟩, by rw [map_smul, e.apply_symm_apply]⟩
+
+end LinearEquiv
+
 section IsBilinearMap
 
 variable
