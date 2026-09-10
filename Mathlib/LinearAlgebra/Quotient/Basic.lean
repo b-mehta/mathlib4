@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.Module.Equiv.Basic
 public import Mathlib.GroupTheory.QuotientGroup.Basic
 public import Mathlib.LinearAlgebra.Pi
+public import Mathlib.LinearAlgebra.Prod
 public import Mathlib.LinearAlgebra.Quotient.Defs
 public import Mathlib.LinearAlgebra.Span.Basic
 
@@ -423,6 +424,32 @@ theorem Quotient.equiv_refl (P : Submodule R M) (Q : Submodule R M)
     (hf : P.map (LinearEquiv.refl R M : M →ₗ[R] M) = Q) :
     Quotient.equiv P Q (LinearEquiv.refl R M) hf = quotEquivOfEq _ _ (by simpa using hf) :=
   rfl
+
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+/-- The quotient of `M × N` by a product submodule is the product of the quotients. -/
+def prodQuotEquiv (P : Submodule R M) (Q : Submodule R N) :
+    ((M × N) ⧸ P.prod Q) ≃ₗ[R] (M ⧸ P) × (N ⧸ Q) :=
+  LinearEquiv.ofLinearMap
+    ((P.prod Q).liftQ (P.mkQ.prodMap Q.mkQ)
+      (le_of_eq (by rw [LinearMap.ker_prodMap, ker_mkQ, ker_mkQ])))
+    (LinearMap.coprod
+      (P.liftQ ((P.prod Q).mkQ.comp (LinearMap.inl R M N))
+        (le_of_eq (by rw [LinearMap.ker_comp, ker_mkQ, prod_comap_inl])))
+      (Q.liftQ ((P.prod Q).mkQ.comp (LinearMap.inr R M N))
+        (le_of_eq (by rw [LinearMap.ker_comp, ker_mkQ, prod_comap_inr]))))
+    (by
+      apply LinearMap.ext
+      rintro ⟨x, y⟩
+      induction x using Submodule.Quotient.induction_on with | _ a =>
+      induction y using Submodule.Quotient.induction_on with | _ b =>
+      simp)
+    (by
+      apply LinearMap.ext
+      rintro z
+      induction z using Submodule.Quotient.induction_on with | _ w =>
+      obtain ⟨x, y⟩ := w
+      simp [← Submodule.Quotient.mk_add])
 
 end Submodule
 
