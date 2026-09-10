@@ -7,6 +7,9 @@ module
 
 public import Mathlib.Algebra.Module.Torsion.Basic
 public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.LinearAlgebra.Dimension.RankNullity
+public import Mathlib.LinearAlgebra.Dimension.Localization
+public import Mathlib.RingTheory.Finiteness.Prod
 
 /-!
 # Results relating rank and torsion.
@@ -38,3 +41,21 @@ rank_eq_zero_iff_isTorsion := Module.rank_eq_zero_iff_isTorsion
 theorem Module.finrank_eq_zero_iff_isTorsion [StrongRankCondition R] [Module.Finite R M] :
     finrank R M = 0 ↔ Module.IsTorsion R M := by
   simp [← rank_eq_zero_iff_isTorsion (R := R), ← finrank_eq_rank]
+
+/-- A finite `ℤ`-module has free rank zero. -/
+lemma Module.finrank_int_zero_of_finite {D : Type*} [AddCommGroup D] [Finite D] :
+    Module.finrank ℤ D = 0 :=
+  Module.finrank_eq_zero_iff_isTorsion.mpr
+    (isAddTorsion_iff_isTorsion_int.mp isAddTorsion_of_finite)
+
+/-- The free rank of `F × D` equals that of `F` when `D` is finite. -/
+lemma Module.finrank_prod_finite {F : Type*} [AddCommGroup F] [Module.Finite ℤ F]
+    {D : Type*} [AddCommGroup D] [Finite D] :
+    Module.finrank ℤ (F × D) = Module.finrank ℤ F := by
+  have hkerD : Module.finrank ℤ (LinearMap.ker (LinearMap.fst ℤ F D)) = 0 := by
+    rw [LinearMap.ker_fst, ← (LinearEquiv.ofInjective (LinearMap.inr ℤ F D)
+      LinearMap.inr_injective).finrank_eq, Module.finrank_int_zero_of_finite]
+  have key := Submodule.finrank_quotient_add_finrank (LinearMap.ker (LinearMap.fst ℤ F D))
+  rw [hkerD, add_zero,
+    (LinearMap.quotKerEquivOfSurjective _ LinearMap.fst_surjective).finrank_eq] at key
+  exact key.symm
