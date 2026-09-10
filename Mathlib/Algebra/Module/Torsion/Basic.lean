@@ -322,7 +322,36 @@ theorem torsionBySet_univ : torsionBySet R M Set.univ = ⊥ := by
   rw [eq_bot_iff, ← torsionBy_one, ← torsionBySet_singleton_eq]
   exact torsionBySet_le_torsionBySet_of_subset fun _ _ => trivial
 
+variable {N : Type*} [AddCommMonoid N] [Module R N]
+
+/-- The `a`-torsion of a product is the product of the `a`-torsions. -/
+theorem torsionBy_prod :
+    torsionBy R (M × N) a = (torsionBy R M a).prod (torsionBy R N a) := by
+  ext ⟨x, y⟩
+  simp [mem_torsionBy_iff, mem_prod, Prod.smul_mk, Prod.ext_iff]
+
+/-- `a • ·` on a product has range the product of the coordinate ranges. -/
+theorem range_lsmul_prod :
+    LinearMap.range (LinearMap.lsmul R (M × N) a) =
+      (LinearMap.range (LinearMap.lsmul R M a)).prod
+        (LinearMap.range (LinearMap.lsmul R N a)) := by
+  have h : LinearMap.lsmul R (M × N) a =
+      LinearMap.prodMap (LinearMap.lsmul R M a) (LinearMap.lsmul R N a) := by
+    ext p <;> simp [LinearMap.lsmul_apply]
+  rw [h, LinearMap.range_prodMap]
+
 end Submodule
+
+/-- A linear equivalence carries `a`-torsion to `a`-torsion. -/
+lemma LinearEquiv.map_torsionBy {R M N : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M]
+    [AddCommMonoid N] [Module R N] (e : M ≃ₗ[R] N) (a : R) :
+    (Submodule.torsionBy R M a).map (e : M →ₗ[R] N) = Submodule.torsionBy R N a := by
+  ext z
+  simp only [Submodule.mem_map, Submodule.mem_torsionBy_iff, LinearEquiv.coe_coe]
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    rw [← map_smul, hy, map_zero]
+  · exact fun hz ↦ ⟨e.symm z, by rw [← map_smul, hz, map_zero], by simp⟩
 
 open Submodule
 
