@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        n: [40, 44, 48]
+        n: [16, 20, 24, 28, 32, 36]
         repetition: [1, 2, 3]
     runs-on: ubuntu-latest
     timeout-minutes: 30
