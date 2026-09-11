@@ -122,18 +122,18 @@ section Val
 theorem head_fin_const (a : α) : (vecHead fun _ : Fin (n + 1) => a) = a :=
   rfl
 
-@[simp]
+@[local simp]
 theorem cons_val_zero (x : α) (u : Fin m → α) : vecCons x u 0 = x :=
   rfl
 
 theorem cons_val_zero' (h : 0 < m.succ) (x : α) (u : Fin m → α) : vecCons x u ⟨0, h⟩ = x :=
   rfl
 
-@[simp]
+@[local simp]
 theorem cons_val_succ (x : α) (u : Fin m → α) (i : Fin m) : vecCons x u i.succ = u i := by
   simp [vecCons]
 
-@[simp]
+@[local simp]
 theorem cons_val_succ' {i : ℕ} (h : i.succ < m.succ) (x : α) (u : Fin m → α) :
     vecCons x u ⟨i.succ, h⟩ = u ⟨i, Nat.lt_of_succ_lt_succ h⟩ := by
   simp only [vecCons, Fin.cons, Fin.cases_succ']
@@ -265,7 +265,7 @@ theorem vec_single_eq_const (a : α) : ![a] = fun _ => a :=
   The simplifier needs a special lemma for length `≥ 2`, in addition to
   `cons_val_succ`, because `1 : Fin 1 = 0 : Fin 1`.
 -/
-@[simp]
+@[local simp]
 theorem cons_val_one (x : α) (u : Fin m.succ → α) : vecCons x u 1 = u 0 :=
   rfl
 
@@ -279,7 +279,7 @@ lemma cons_val_four (x : α) (u : Fin m.succ.succ.succ.succ → α) :
     vecCons x u 4 = vecHead (vecTail (vecTail (vecTail u))) :=
   rfl
 
-@[simp]
+@[local simp]
 theorem cons_val_fin_one (x : α) (u : Fin 0 → α) : ∀ (i : Fin 1), vecCons x u i = x := by
   rw [Fin.forall_fin_one]
   rfl
@@ -469,6 +469,8 @@ lemma const_fin1_eq (x : α) : (fun _ : Fin 1 => x) = ![x] :=
 -/
 
 section swap
+
+attribute [local simp] cons_val_zero cons_val_succ cons_val_succ' cons_val_one cons_val_fin_one
 
 @[simp]
 lemma cons_cons_comp_swap_zero_one (a b : α) (x : Fin n → α) :
