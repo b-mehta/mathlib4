@@ -446,13 +446,20 @@ private lemma sum_pow_add_indicator_eq_zero {p : ℕ} (l : ℕ) [Fact p.Prime] :
   rw [hbij, FiniteField.sum_pow_units, ZMod.card]
   grind
 
-/- A rational number `x` is `p`-integral if `p` does not divide its denominator, i.e. it lies in
-the valuation subring of the `p`-adic valuation. -/
-private abbrev pIntegral (p : ℕ) (x : ℚ) [Fact p.Prime] : Prop := x ∈ (Rat.padicValuation p).integer
+/- A rational number `x` is `p`-integral if `p` does not divide its denominator. -/
+private abbrev pIntegral (p : ℕ) (x : ℚ) [Fact p.Prime] : Prop := Rat.padicValuation p x ≤ 1
 
-private lemma pIntegral_iff_not_dvd_den {p : ℕ} [Fact p.Prime] {x : ℚ} :
-    pIntegral p x ↔ ¬ p ∣ x.den :=
-  Rat.padicValuation_le_one_iff
+private lemma pIntegral_mul {p : ℕ} [Fact p.Prime] {x y : ℚ}
+    (hx : pIntegral p x) (hy : pIntegral p y) : pIntegral p (x * y) :=
+  ((Rat.padicValuation p).map_mul x y).trans_le (mul_le_one' hx hy)
+
+/- A natural-number cast is `p`-integral. -/
+private lemma pIntegral_natCast {p : ℕ} [Fact p.Prime] (n : ℕ) : pIntegral p (n : ℚ) := by
+  exact_mod_cast Int.padicValuation_le_one p n
+
+/- An integer cast is `p`-integral. -/
+private lemma pIntegral_intCast {p : ℕ} [Fact p.Prime] (z : ℤ) : pIntegral p (z : ℚ) :=
+  Int.padicValuation_le_one p z
 
 /- Dividing a `p`-integral rational by a `p`-coprime nat stays `p`-integral. -/
 private lemma pIntegral_div_natCast {p : ℕ} [Fact p.Prime] {a : ℚ} {n : ℕ}
@@ -460,7 +467,9 @@ private lemma pIntegral_div_natCast {p : ℕ} [Fact p.Prime] {a : ℚ} {n : ℕ}
   have hvn : Rat.padicValuation p n = 1 := by
     simpa [Int.padicValuation_eq_one_iff, Int.natCast_dvd_natCast]
   rw [div_eq_mul_inv]
-  exact mul_mem ha (by simp [Valuation.mem_integer_iff, hvn])
+  refine pIntegral_mul ha ?_
+  have h : Rat.padicValuation p ((n : ℚ)⁻¹) ≤ 1 := by rw [map_inv₀, hvn, inv_one]
+  exact h
 
 /- Denominators of the "other primes" part of the indicator sum
 stay coprime to a fixed prime `p`. -/
@@ -504,7 +513,7 @@ private lemma pIntegral_pow_div {p M N : ℕ} [Fact p.Prime] (hM : M ≠ 0)
     norm_cast
     simp
   rw [hrw]
-  exact pIntegral_iff_not_dvd_den.2 ((Nat.Prime.coprime_iff_not_dvd Fact.out).1
+  exact Rat.padicValuation_le_one_iff.2 ((Nat.Prime.coprime_iff_not_dvd Fact.out).1
     (hM'_cop.coprime_dvd_left (by
       rw [hM'_eq]; exact Int.natCast_dvd_natCast.mp (Rat.den_dvd _ _))).symm)
 
@@ -536,7 +545,7 @@ private lemma pIntegral_choose_mul_pow_div {k m p : ℕ} (hm_lt : m < k) [Fact p
   have h_denom_rat : (2 * (k : ℚ) - 2 * m + 1) = ((d + 1 : ℕ) : ℚ) := by
     simp only [hd_def]; push_cast [Nat.cast_sub hkm]; ring
   rw [h_exp, h_denom_rat, mul_div_assoc]
-  exact mul_mem (natCast_mem _ ((2 * k).choose (2 * m)))
+  exact pIntegral_mul (pIntegral_natCast ((2 * k).choose (2 * m)))
     (pIntegral_pow_div hd_plus_one_ne_zero (factorization_succ_le_sub_one hd))
 
 /- Uses the induction hypothesis on `B_{2m} + e_{2m}(p)/p`
@@ -558,15 +567,15 @@ private lemma pIntegral_bernoulli_even_term {k m p : ℕ} (hm_lt : m < k) [Fact 
   rw [hdecomp]
   have hcmp := pIntegral_choose_mul_pow_div (p := p) hm_lt (by lia)
   have H x := choose_two_mul_succ_mul_div_eq x hm_lt
-  apply sub_mem
+  apply (Rat.padicValuation p).map_sub_le
   · rw [mul_assoc, mul_div_assoc]
-    apply mul_mem ih
+    apply pIntegral_mul ih
     have hpow_mul : ((2 * k).choose (2 * m) : ℚ) * (p : ℚ) ^ (2 * k - 2 * m) /
         (2 * k - 2 * m + 1) =
         (p : ℚ) * (((2 * k).choose (2 * m) : ℚ) * P / (2 * k - 2 * m + 1)) := by
       rw [hpow]; ring
     rw [H, hpow_mul]
-    exact mul_mem (natCast_mem _ p) hcmp
+    exact pIntegral_mul (pIntegral_natCast p) hcmp
   · unfold vonStaudtIndicator
     split_ifs
     · grind
@@ -653,12 +662,12 @@ private lemma pIntegral_bernoulli_add_indicator {p : ℕ} [Fact p.Prime] :
   | h k ih =>
     obtain ⟨T, hT⟩ := bernoulli_add_indicator_eq_sub (p := p) hk
     rw [hT]
-    exact sub_mem (intCast_mem _ T) (pIntegral_faulhaber_sum ih)
+    exact (Rat.padicValuation p).map_sub_le (pIntegral_intCast T) (pIntegral_faulhaber_sum ih)
 
 lemma not_dvd_den_bernoulli_add_ite {p k : ℕ} (hp : p.Prime)
     (hk₀ : k ≠ 0) (hk : Even k) : ¬ p ∣ (bernoulli k + (if p - 1 ∣ k then 1 else 0) / p).den := by
   have : Fact p.Prime := ⟨hp⟩
-  rw [← pIntegral_iff_not_dvd_den]
+  rw [← Rat.padicValuation_le_one_iff]
   exact pIntegral_bernoulli_add_indicator hk₀.bot_lt hk
 
 /-- For even `k > 0`, a prime `p` divides the denominator of `bernoulli k` exactly when
@@ -666,13 +675,13 @@ lemma not_dvd_den_bernoulli_add_ite {p k : ℕ} (hp : p.Prime)
 theorem dvd_den_bernoulli_iff {p k : ℕ} (hp : p.Prime) (hm : Even k) (hm0 : k ≠ 0) :
     p ∣ (bernoulli k).den ↔ p - 1 ∣ k := by
   have : Fact p.Prime := ⟨hp⟩
-  rw [← not_iff_not, ← pIntegral_iff_not_dvd_den]
+  rw [← not_iff_not, ← Rat.padicValuation_le_one_iff]
   have : pIntegral p (bernoulli k + vonStaudtIndicator k p / p) :=
     pIntegral_bernoulli_add_indicator (by lia) hm
   refine ⟨fun h ↦ ?_, by grind [vonStaudtIndicator]⟩
-  have h1p : ¬ pIntegral p (1 / p) := by simp [pIntegral_iff_not_dvd_den, hp.ne_zero]
+  have h1p : ¬ pIntegral p (1 / p) := by simp [Rat.padicValuation_le_one_iff, hp.ne_zero]
   contrapose! h1p
-  simpa [vonStaudtIndicator, h1p] using sub_mem this h
+  simpa [vonStaudtIndicator, h1p] using (Rat.padicValuation p).map_sub_le this h
 
 /--
 If a prime `p` divides the denominator of a Bernoulli number `bernoulli k` then `p - 1 ∣ k`.
@@ -692,7 +701,7 @@ theorem sub_one_dvd_of_dvd_den_bernoulli {p k : ℕ} (hp : p.Prime) (hk : p ∣ 
 `sub_one_dvd_of_dvd_den_bernoulli`). -/
 private theorem pIntegral_bernoulli_of_not_dvd {p k : ℕ} [Fact p.Prime] (hk : ¬ p - 1 ∣ k) :
     pIntegral p (bernoulli k) :=
-  pIntegral_iff_not_dvd_den.2 (mt (sub_one_dvd_of_dvd_den_bernoulli Fact.out) hk)
+  Rat.padicValuation_le_one_iff.2 (mt (sub_one_dvd_of_dvd_den_bernoulli Fact.out) hk)
 
 private theorem pIntegral_mul_bernoulli {p k : ℕ} [Fact p.Prime] :
     pIntegral p (p * bernoulli k) := by
@@ -710,14 +719,15 @@ private theorem pIntegral_mul_bernoulli {p k : ℕ} [Fact p.Prime] :
         p * bernoulli k := by
       field [hp.ne_zero]
     rw [← hid]
-    apply sub_mem (mul_mem (natCast_mem _ p) (pIntegral_bernoulli_add_indicator (by lia) (by lia)))
-    simp [vonStaudtIndicator, apply_ite]
+    apply (Rat.padicValuation p).map_sub_le (pIntegral_mul (pIntegral_natCast p) (pIntegral_bernoulli_add_indicator (by lia) (by lia)))
+    simp only [pIntegral, vonStaudtIndicator]
+    split <;> simp
   · simp [bernoulli_eq_zero_of_odd ho hk₁]
 
 theorem not_dvd_mul_bernoulli {p k : ℕ} (hp : p.Prime) :
     ¬ p ∣ (p * bernoulli k).den := by
   have : Fact p.Prime := ⟨hp⟩
-  rw [← pIntegral_iff_not_dvd_den]
+  rw [← Rat.padicValuation_le_one_iff]
   exact pIntegral_mul_bernoulli
 
 theorem squarefree_den_bernoulli {k : ℕ} :
@@ -739,8 +749,9 @@ private lemma not_dvd_den_vonStaudt_sum {k p : ℕ} (hk : Even k) [Fact p.Prime]
   · simp [vonStaudtPrimes, range_add_one, not_prime_one, not_prime_zero, Finset.filter_insert,
       Finset.filter_singleton]
   rw [sum_one_div_prime_eq_indicator_div_add (p := p) (by lia), ← add_assoc]
-  apply add_mem (pIntegral_bernoulli_add_indicator hk₀ hk) (_ : pIntegral _ _)
-  rw [pIntegral_iff_not_dvd_den, ← Nat.Prime.coprime_iff_not_dvd Fact.out]
+  apply (Rat.padicValuation p).map_add_le (pIntegral_bernoulli_add_indicator hk₀ hk) (_ : pIntegral _ _)
+  simp only [pIntegral]
+  rw [Rat.padicValuation_le_one_iff, ← Nat.Prime.coprime_iff_not_dvd Fact.out]
   exact (prod_one_div_prime_den_coprime _).symm.of_dvd_right (Rat.den_sum_dvd_prod_den _ _)
 
 /-- **von Staudt-Clausen theorem:** For any even natural number $k$, the sum
@@ -752,13 +763,13 @@ theorem vonStaudt_clausen {k : ℕ} (hk : Even k) :
   rw [Set.mem_range]
   refine ⟨_, Rat.coe_int_num_of_den_eq_one <| eq_one_iff_not_exists_prime_dvd.2 fun p hp ↦ ?_⟩
   have : Fact p.Prime := ⟨hp⟩
-  rw [← pIntegral_iff_not_dvd_den]
+  rw [← Rat.padicValuation_le_one_iff]
   exact not_dvd_den_vonStaudt_sum hk
 
 /-- The denominator of a `p`-integral rational is a unit mod `p`. -/
 private theorem den_ne {p : ℕ} [Fact p.Prime] {x : ℚ} (hx : pIntegral p x) :
     (x.den : ZMod p) ≠ 0 := by
-  rwa [Ne, ZMod.natCast_eq_zero_iff, ← pIntegral_iff_not_dvd_den]
+  rwa [Ne, ZMod.natCast_eq_zero_iff, ← Rat.padicValuation_le_one_iff]
 
 /- Casting respects addition of two `p`-integral rationals. -/
 private theorem cast_add_pIntegral {p : ℕ} [Fact p.Prime] {a b : ℚ}
@@ -809,7 +820,7 @@ theorem faulhaber_mod_sq {p : ℕ} [Fact p.Prime] {k : ℕ} (hk : Even k) (hk1 :
           = ((p : ℚ) * bernoulli i)
             * ((k.choose i : ℚ) * ((p : ℚ) ^ (k - 2 - i) / ((k + 1 - i : ℕ) : ℚ))) := by ring
       rw [hpeel, hregroup]
-      refine mul_mem (pIntegral_mul_bernoulli) (mul_mem (natCast_mem _ _) ?_)
+      refine pIntegral_mul (pIntegral_mul_bernoulli) (pIntegral_mul (pIntegral_natCast _) ?_)
       refine pIntegral_pow_div (by omega) ?_
       have h3 : 3 ≤ k + 1 - i := by omega
       have hml := Nat.mul_factorization_le (n := k + 1 - i) (p := p)
@@ -820,7 +831,7 @@ theorem faulhaber_mod_sq {p : ℕ} [Fact p.Prime] {k : ℕ} (hk : Even k) (hk1 :
       have htwo : k + 1 - (k - 1) = 2 := by omega
       rw [hz, pow_zero, mul_one, htwo]
       refine pIntegral_div_natCast
-        (mul_mem (pIntegral_bernoulli_of_not_dvd hkm1) (natCast_mem _ _)) ?_
+        (pIntegral_mul (pIntegral_bernoulli_of_not_dvd hkm1) (pIntegral_natCast _)) ?_
       intro hd
       have := Nat.le_of_dvd (by norm_num) hd
       omega
@@ -969,13 +980,14 @@ theorem voronoi_congr {p : ℕ} [Fact p.Prime] {c k : ℕ} (hc : ¬ p ∣ c) (hk
   have hpck : pIntegral p ((c : ℚ) ^ k) := by
     have hck : (c : ℚ) ^ k = ((c ^ k : ℕ) : ℚ) := by push_cast; ring
     rw [hck]
-    exact natCast_mem _ _
-  have hpc : pIntegral p ((c : ℚ) ^ k - 1) := sub_mem hpck (one_mem _)
+    exact pIntegral_natCast _
+  have hpc : pIntegral p ((c : ℚ) ^ k - 1) := (Rat.padicValuation p).map_sub_le hpck (((Rat.padicValuation p).map_one).le)
   have hpB : pIntegral p (bernoulli k) := pIntegral_bernoulli_of_not_dvd hk1
   have cast_sub_pIntegral : ∀ {a b : ℚ}, pIntegral p a → pIntegral p b →
       (((a - b : ℚ)) : ZMod p) = (a : ZMod p) - (b : ZMod p) := by
     intro a b ha hb
-    rw [sub_eq_add_neg, cast_add_pIntegral ha (neg_mem hb), Rat.cast_neg, ← sub_eq_add_neg]
+    have hnb : pIntegral p (-b) := ((Rat.padicValuation p).map_neg b).trans_le hb
+    rw [sub_eq_add_neg, cast_add_pIntegral ha hnb, Rat.cast_neg, ← sub_eq_add_neg]
   have hSQ : (∑ a ∈ range p, (a : ℚ) ^ k) = (Sz : ℚ) := by
     rw [hSz]
     push_cast
@@ -994,7 +1006,7 @@ theorem voronoi_congr {p : ℕ} [Fact p.Prime] {c k : ℕ} (hc : ¬ p ∣ c) (hk
   have hWq : (Sz : ℚ) - (p : ℚ) * bernoulli k = (p : ℚ) ^ 2 * W := by rw [← hSQ]; exact hWeq
   set M : ℚ := (C : ℚ) - ((c : ℚ) ^ k - 1) * W with hM
   have hMpint : pIntegral p M :=
-    sub_mem (intCast_mem _ C) (mul_mem hpc hWpint)
+    (Rat.padicValuation p).map_sub_le (pIntegral_intCast C) (pIntegral_mul hpc hWpint)
   have hstar : ((c : ℚ) ^ k - 1) * bernoulli k
       = (k : ℚ) * (c : ℚ) ^ (k - 1) * (Vz : ℚ) + (p : ℚ) * M := by
     refine mul_left_cancel₀ hp0 ?_
@@ -1007,22 +1019,22 @@ theorem voronoi_congr {p : ℕ} [Fact p.Prime] {c k : ℕ} (hc : ¬ p ∣ c) (hk
   have castL : ((((c : ℚ) ^ k - 1) * bernoulli k : ℚ) : ZMod p)
       = ((c : ZMod p) ^ k - 1) * (bernoulli k : ZMod p) := by
     have hck : (c : ℚ) ^ k = ((c ^ k : ℕ) : ℚ) := by push_cast; ring
-    rw [cast_mul_pIntegral hpc hpB, cast_sub_pIntegral hpck (one_mem _), Rat.cast_one,
+    rw [cast_mul_pIntegral hpc hpB, cast_sub_pIntegral hpck (((Rat.padicValuation p).map_one).le), Rat.cast_one,
       hck, Rat.cast_natCast]
     push_cast
     ring
   have hck1 : (c : ℚ) ^ (k - 1) = ((c ^ (k - 1) : ℕ) : ℚ) := by push_cast; ring
   have hpck1 : pIntegral p ((c : ℚ) ^ (k - 1)) := by
     rw [hck1]
-    exact natCast_mem _ _
+    exact pIntegral_natCast _
   have castR : (((k : ℚ) * (c : ℚ) ^ (k - 1) * (Vz : ℚ) + (p : ℚ) * M : ℚ) : ZMod p)
       = (k : ZMod p) * (c : ZMod p) ^ (k - 1) * voronoiSum (p := p) c k := by
     rw [cast_add_pIntegral
-        (mul_mem (mul_mem (natCast_mem _ k) hpck1) (intCast_mem _ Vz))
-        (mul_mem (natCast_mem _ p) hMpint),
-      cast_mul_pIntegral (mul_mem (natCast_mem _ k) hpck1) (intCast_mem _ Vz),
-      cast_mul_pIntegral (natCast_mem _ k) hpck1,
-      cast_mul_pIntegral (natCast_mem _ p) hMpint,
+        (pIntegral_mul (pIntegral_mul (pIntegral_natCast k) hpck1) (pIntegral_intCast Vz))
+        (pIntegral_mul (pIntegral_natCast p) hMpint),
+      cast_mul_pIntegral (pIntegral_mul (pIntegral_natCast k) hpck1) (pIntegral_intCast Vz),
+      cast_mul_pIntegral (pIntegral_natCast k) hpck1,
+      cast_mul_pIntegral (pIntegral_natCast p) hMpint,
       Rat.cast_natCast, Rat.cast_natCast, ZMod.natCast_self, zero_mul, add_zero,
       hck1, Rat.cast_natCast, Rat.cast_intCast, hVzcast]
     push_cast
