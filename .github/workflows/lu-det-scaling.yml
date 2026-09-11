@@ -7,7 +7,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        n: [16, 20, 24, 28, 32, 36, 40, 44, 48]
+        n: [40, 44, 48]
+        repetition: [1, 2, 3]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -18,10 +19,21 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: get cache
         run: lake exe cache get
-      - name: benchmark n=${{ matrix.n }}
+      - name: benchmark n=${{ matrix.n }}, repetition ${{ matrix.repetition }}
         run: |
           set -o pipefail
           lake build Mathlib.Tactic.LUDet Mathlib.Tactic.NormRank
-          { /usr/bin/time -f "[n=${{ matrix.n }}] wall %e s" lake env lean "bench/scaling/Bench${{ matrix.n }}.lean"; } 2>&1 |
+          source_file="bench/scaling/Bench${{ matrix.n }}.lean"
+          sed '/-- Alternate the order/,$d' "$source_file" > /tmp/Bench.lean
+          if (( ${{ matrix.repetition }} % 2 )); then
+            awk '/^example : Matrix.det/{p=1} p{print} p && /^  lu_det/{exit}' "$source_file" >> /tmp/Bench.lean
+            printf '%s\n' 'set_option maxHeartbeats 4000000 in' >> /tmp/Bench.lean
+            awk '/^example : Matrix.rank/{p=1} p{print} p && /^  eval_rank/{exit}' "$source_file" >> /tmp/Bench.lean
+          else
+            printf '%s\n' 'set_option maxHeartbeats 4000000 in' >> /tmp/Bench.lean
+            awk '/^example : Matrix.rank/{p=1} p{print} p && /^  eval_rank/{exit}' "$source_file" >> /tmp/Bench.lean
+            awk '/^example : Matrix.det/{p=1} p{print} p && /^  lu_det/{exit}' "$source_file" >> /tmp/Bench.lean
+          fi
+          { /usr/bin/time -f "[n=${{ matrix.n }} rep=${{ matrix.repetition }}] wall %e s" lake env lean /tmp/Bench.lean; } 2>&1 |
             grep -E "LUDet.tacticLu_det took|evalRank took|simp took|elaboration took|type checking took|wall" |
-            sed "s/^/[n=${{ matrix.n }}] /"
+            sed "s/^/[n=${{ matrix.n }} rep=${{ matrix.repetition }}] /"
