@@ -215,6 +215,9 @@ theorem eq_top_iff {s : Setoid α} : s = (⊤ : Setoid α) ↔ ∀ x y : α, s x
 @[simp]
 theorem ker_eq_bot_iff {f : α → β} : ker f = ⊥ ↔ f.Injective := le_bot_iff.symm
 
+/-- The kernel of `f` is the top setoid iff `f` is constant on every pair. -/
+theorem ker_eq_top {f : α → β} : ker f = ⊤ ↔ ∀ x y, f x = f y := eq_top_iff
+
 lemma sInf_equiv {S : Set (Setoid α)} {x y : α} :
     letI := sInf S
     x ≈ y ↔ ∀ s ∈ S, s x y := Iff.rfl
