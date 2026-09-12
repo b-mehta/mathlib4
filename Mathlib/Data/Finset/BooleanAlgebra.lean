@@ -50,6 +50,7 @@ theorem univ_nonempty_iff : (univ : Finset α).Nonempty ↔ Nonempty α := by
 theorem univ_nonempty [Nonempty α] : (univ : Finset α).Nonempty :=
   univ_nonempty_iff.2 ‹_›
 
+@[grind =]
 theorem univ_eq_empty_iff : (univ : Finset α) = ∅ ↔ IsEmpty α := by
   contrapose!; exact univ_nonempty_iff
 
