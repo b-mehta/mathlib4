@@ -12,6 +12,7 @@ public import Mathlib.Algebra.GroupWithZero.Regular
 public import Mathlib.Algebra.Regular.SMul
 public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 public import Mathlib.Algebra.GroupWithZero.Pi
+public import Mathlib.Algebra.GroupWithZero.Prod
 import Mathlib.Algebra.GroupWithZero.Action.Regular
 
 /-!
@@ -290,18 +291,6 @@ theorem comap_nonZeroDivisors_le_of_injective [MonoidWithZeroHomClass F M₀ M�
 
 end MonoidWithZero
 
-section Pi
-variable {ι : Type*} {M₀ : ι → Type*} [∀ i, MonoidWithZero (M₀ i)] {x : ∀ i, M₀ i}
-
-/-- An element of a product of monoids with zero whose coordinates are non-zero-divisors is a
-non-zero-divisor. -/
-lemma Pi.mem_nonZeroDivisors (hx : ∀ i, x i ∈ nonZeroDivisors (M₀ i)) :
-    x ∈ nonZeroDivisors (∀ i, M₀ i) :=
-  ⟨fun _ h ↦ funext fun i ↦ (hx i).1 _ (congrFun h i),
-    fun _ h ↦ funext fun i ↦ (hx i).2 _ (congrFun h i)⟩
-
-end Pi
-
 section CommMonoidWithZero
 variable {M₀ : Type*} [CommMonoidWithZero M₀] {a b r x : M₀}
 
@@ -439,3 +428,27 @@ lemma associatesNonZeroDivisorsEquiv_symm_mk_mk (a : M₀) (ha) :
   rfl
 
 end CommMonoidWithZero
+
+section Pi
+variable {ι : Type*} {M₀ : ι → Type*} [∀ i, MonoidWithZero (M₀ i)] {x : ∀ i, M₀ i}
+
+/-- An element of a product of monoids with zero whose coordinates are non-zero-divisors is a
+non-zero-divisor. -/
+lemma Pi.mem_nonZeroDivisors (hx : ∀ i, x i ∈ nonZeroDivisors (M₀ i)) :
+    x ∈ nonZeroDivisors (∀ i, M₀ i) :=
+  ⟨fun _ h ↦ funext fun i ↦ (hx i).1 _ (congrFun h i),
+    fun _ h ↦ funext fun i ↦ (hx i).2 _ (congrFun h i)⟩
+
+end Pi
+
+section Prod
+variable {M₀ N₀ : Type*} [MonoidWithZero M₀] [MonoidWithZero N₀] {x : M₀ × N₀}
+
+/-- An element of a binary product of monoids with zero whose coordinates are non-zero-divisors is a
+non-zero-divisor. -/
+lemma Prod.mem_nonZeroDivisors (h₁ : x.1 ∈ nonZeroDivisors M₀) (h₂ : x.2 ∈ nonZeroDivisors N₀) :
+    x ∈ nonZeroDivisors (M₀ × N₀) :=
+  ⟨fun _ h ↦ Prod.ext (h₁.1 _ (congrArg Prod.fst h)) (h₂.1 _ (congrArg Prod.snd h)),
+    fun _ h ↦ Prod.ext (h₁.2 _ (congrArg Prod.fst h)) (h₂.2 _ (congrArg Prod.snd h))⟩
+
+end Prod
