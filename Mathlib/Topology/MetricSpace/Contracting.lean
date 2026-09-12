@@ -240,6 +240,61 @@ theorem one_sub_K_pos (hf : ContractingWith K f) : (0 : ℝ) < 1 - K :=
   sub_pos.2 hf.1
 
 section
+open Set
+
+/-- Two fixed points of `f` lying in a forward-invariant set `s` on which `f` contracts are
+equal. -/
+theorem eq_of_fixedPoints {s : Set α} (hsf : MapsTo f s s)
+    (hf : ContractingWith K <| hsf.restrict f s s)
+    {x y : α} (hxs : x ∈ s) (hys : y ∈ s) (hx : IsFixedPt f x) (hy : IsFixedPt f y) :
+    x = y := by
+  have hx' : IsFixedPt (hsf.restrict f s s) ⟨x, hxs⟩ := Subtype.ext hx
+  have hy' : IsFixedPt (hsf.restrict f s s) ⟨y, hys⟩ := Subtype.ext hy
+  simpa using (hf.eq_or_edist_eq_top_of_fixedPoints hx' hy').resolve_right (edist_ne_top _ _)
+
+end
+
+section
+variable [CompleteSpace α]
+open Set
+
+variable (f) in
+/-- The unique fixed point of a self-map `f` that contracts on a closed, nonempty,
+forward-invariant set `s`. -/
+noncomputable def fixedPoint' {s : Set α} (hsc : IsClosed s) (hs' : s.Nonempty)
+    (hsf : MapsTo f s s) (hf : ContractingWith K <| hsf.restrict f s s) :
+    α :=
+  Classical.choose <|
+    hf.exists_fixedPoint' hsc.isComplete hsf (Exists.choose_spec hs')
+      (edist_ne_top (Exists.choose hs') _)
+
+/-- The point provided by `ContractingWith.fixedPoint'` lies in `s`. -/
+theorem fixedPoint'_mem {s : Set α} (hsc : IsClosed s) (hs' : s.Nonempty) (hsf : MapsTo f s s)
+    (hf : ContractingWith K <| hsf.restrict f s s) :
+    fixedPoint' f hsc hs' hsf hf ∈ s :=
+  (Classical.choose_spec <|
+    hf.exists_fixedPoint' hsc.isComplete hsf (Exists.choose_spec hs')
+      (edist_ne_top (Exists.choose hs') _)).1
+
+/-- The point provided by `ContractingWith.fixedPoint'` is a fixed point of `f`. -/
+theorem fixedPoint'_isFixedPt {s : Set α} (hsc : IsClosed s) (hs' : s.Nonempty)
+    (hsf : MapsTo f s s) (hf : ContractingWith K <| hsf.restrict f s s) :
+    IsFixedPt f (fixedPoint' f hsc hs' hsf hf) :=
+  (Classical.choose_spec <|
+    hf.exists_fixedPoint' hsc.isComplete hsf (Exists.choose_spec hs')
+      (edist_ne_top (Exists.choose hs') _)).2.1
+
+/-- Any fixed point of `f` lying in `s` equals `ContractingWith.fixedPoint'`. -/
+theorem fixedPoint'_unique {s : Set α} (hsc : IsClosed s) (hs' : s.Nonempty)
+    (hsf : MapsTo f s s) (hf : ContractingWith K <| hsf.restrict f s s)
+    {x : α} (hxs : x ∈ s) (hx : IsFixedPt f x) :
+    x = fixedPoint' f hsc hs' hsf hf :=
+  hf.eq_of_fixedPoints hsf hxs (hf.fixedPoint'_mem hsc hs' hsf) hx
+    (hf.fixedPoint'_isFixedPt hsc hs' hsf)
+
+end
+
+section
 variable (hf : ContractingWith K f)
 include hf
 
