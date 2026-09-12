@@ -293,6 +293,25 @@ theorem cons_fin_one (x : α) (u : Fin 0 → α) : vecCons x u = fun _ => x :=
 theorem vecCons_inj {x y : α} {u v : Fin n → α} : vecCons x u = vecCons y v ↔ x = y ∧ u = v :=
   Fin.cons_inj
 
+/-- The empty vector is an injective function. -/
+@[simp] theorem injective_vecEmpty : Function.Injective (![] : Fin 0 → α) :=
+  Function.injective_of_subsingleton _
+
+/-- `vecCons x₀ x` is injective iff `x₀` is not in the range of `x` and `x` is injective. -/
+@[simp] theorem injective_vecCons_iff {x₀ : α} {x : Fin n → α} :
+    Function.Injective (vecCons x₀ x) ↔ x₀ ∉ Set.range x ∧ Function.Injective x :=
+  Fin.cons_injective_iff
+
+/-- A two-element vector is injective iff its entries are distinct. -/
+theorem injective_vecCons_two_iff {x y : α} : Function.Injective ![x, y] ↔ x ≠ y := by
+  simp
+
+/-- A three-element vector is injective iff its entries are pairwise distinct. -/
+theorem injective_vecCons_three_iff {x y z : α} :
+    Function.Injective ![x, y, z] ↔ x ≠ y ∧ x ≠ z ∧ y ≠ z := by
+  simp [not_or]
+  grind
+
 open Lean Qq in
 /-- `mkVecLiteralQ ![x, y, z]` produces the term `q(![$x, $y, $z])`. -/
 meta def _root_.PiFin.mkLiteralQ {u : Level} {α : Q(Type u)} {n : ℕ} (elems : Fin n → Q($α)) :
