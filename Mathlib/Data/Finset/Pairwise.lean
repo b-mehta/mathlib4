@@ -38,6 +38,13 @@ theorem PairwiseDisjoint.elim_finset {s : Set ι} {f : ι → Finset α} (hs : s
     {i j : ι} (hi : i ∈ s) (hj : j ∈ s) (a : α) (hai : a ∈ f i) (haj : a ∈ f j) : i = j :=
   hs.elim hi hj (Finset.not_disjoint_iff.2 ⟨a, hai, haj⟩)
 
+/-- Two distinct elements of a `Finset` that is pairwise disjoint under `f` have disjoint images. -/
+@[grind .]
+theorem PairwiseDisjoint.disjoint_of_ne [PartialOrder α] [OrderBot α] {s : Finset ι} {f : ι → α}
+    {i j : ι} (h : (s : Set ι).PairwiseDisjoint f) (hi : i ∈ s) (hj : j ∈ s) (hij : i ≠ j) :
+    Disjoint (f i) (f j) :=
+  h hi hj hij
+
 section PartialOrder
 
 variable [PartialOrder α] [OrderBot α] {s : Finset ι} {f : ι → α}
