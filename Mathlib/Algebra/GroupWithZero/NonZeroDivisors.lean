@@ -432,23 +432,41 @@ end CommMonoidWithZero
 section Pi
 variable {ι : Type*} {M₀ : ι → Type*} [∀ i, MonoidWithZero (M₀ i)] {x : ∀ i, M₀ i}
 
-/-- An element of a product of monoids with zero whose coordinates are non-zero-divisors is a
-non-zero-divisor. -/
-lemma Pi.mem_nonZeroDivisors (hx : ∀ i, x i ∈ nonZeroDivisors (M₀ i)) :
-    x ∈ nonZeroDivisors (∀ i, M₀ i) :=
-  ⟨fun _ h ↦ funext fun i ↦ (hx i).1 _ (congrFun h i),
-    fun _ h ↦ funext fun i ↦ (hx i).2 _ (congrFun h i)⟩
+/-- An element of a product of monoids with zero is a non-zero-divisor iff each of its coordinates
+is a non-zero-divisor. -/
+lemma Pi.mem_nonZeroDivisors_iff :
+    x ∈ nonZeroDivisors (∀ i, M₀ i) ↔ ∀ i, x i ∈ nonZeroDivisors (M₀ i) := by
+  classical
+  refine ⟨fun hx i ↦ ⟨fun y hy ↦ ?_, fun y hy ↦ ?_⟩, fun hx ↦
+    ⟨fun _ h ↦ funext fun i ↦ (hx i).1 _ (congrFun h i),
+      fun _ h ↦ funext fun i ↦ (hx i).2 _ (congrFun h i)⟩⟩
+  · have h := hx.1 (Function.update 0 i y) (funext fun j ↦ ?_)
+    · simpa using congrFun h i
+    · rcases eq_or_ne j i with rfl | hj
+      · simpa using hy
+      · simp [Function.update_of_ne hj]
+  · have h := hx.2 (Function.update 0 i y) (funext fun j ↦ ?_)
+    · simpa using congrFun h i
+    · rcases eq_or_ne j i with rfl | hj
+      · simpa using hy
+      · simp [Function.update_of_ne hj]
 
 end Pi
 
 section Prod
 variable {M₀ N₀ : Type*} [MonoidWithZero M₀] [MonoidWithZero N₀] {x : M₀ × N₀}
 
-/-- An element of a binary product of monoids with zero whose coordinates are non-zero-divisors is a
-non-zero-divisor. -/
-lemma Prod.mem_nonZeroDivisors (h₁ : x.1 ∈ nonZeroDivisors M₀) (h₂ : x.2 ∈ nonZeroDivisors N₀) :
-    x ∈ nonZeroDivisors (M₀ × N₀) :=
-  ⟨fun _ h ↦ Prod.ext (h₁.1 _ (congrArg Prod.fst h)) (h₂.1 _ (congrArg Prod.snd h)),
-    fun _ h ↦ Prod.ext (h₁.2 _ (congrArg Prod.fst h)) (h₂.2 _ (congrArg Prod.snd h))⟩
+/-- An element of a binary product of monoids with zero is a non-zero-divisor iff each of its
+coordinates is a non-zero-divisor. -/
+lemma Prod.mem_nonZeroDivisors_iff :
+    x ∈ nonZeroDivisors (M₀ × N₀) ↔ x.1 ∈ nonZeroDivisors M₀ ∧ x.2 ∈ nonZeroDivisors N₀ := by
+  refine ⟨fun hx ↦ ⟨⟨fun y hy ↦ ?_, fun y hy ↦ ?_⟩, ⟨fun y hy ↦ ?_, fun y hy ↦ ?_⟩⟩,
+    fun ⟨h₁, h₂⟩ ↦
+      ⟨fun _ h ↦ Prod.ext (h₁.1 _ (congrArg Prod.fst h)) (h₂.1 _ (congrArg Prod.snd h)),
+        fun _ h ↦ Prod.ext (h₁.2 _ (congrArg Prod.fst h)) (h₂.2 _ (congrArg Prod.snd h))⟩⟩
+  · simpa using congrArg Prod.fst (hx.1 (y, 0) (Prod.ext (by simpa using hy) (by simp)))
+  · simpa using congrArg Prod.fst (hx.2 (y, 0) (Prod.ext (by simpa using hy) (by simp)))
+  · simpa using congrArg Prod.snd (hx.1 (0, y) (Prod.ext (by simp) (by simpa using hy)))
+  · simpa using congrArg Prod.snd (hx.2 (0, y) (Prod.ext (by simp) (by simpa using hy)))
 
 end Prod
