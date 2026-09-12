@@ -11,6 +11,7 @@ public import Mathlib.Algebra.GroupWithZero.Associated
 public import Mathlib.Algebra.GroupWithZero.Regular
 public import Mathlib.Algebra.Regular.SMul
 public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Algebra.GroupWithZero.Pi
 import Mathlib.Algebra.GroupWithZero.Action.Regular
 
 /-!
@@ -288,6 +289,18 @@ theorem comap_nonZeroDivisors_le_of_injective [MonoidWithZeroHomClass F M₀ M�
   fun _ ha ↦ mem_nonZeroDivisors_of_injective hf (Submonoid.mem_comap.mp ha)
 
 end MonoidWithZero
+
+section Pi
+variable {ι : Type*} {M₀ : ι → Type*} [∀ i, MonoidWithZero (M₀ i)] {x : ∀ i, M₀ i}
+
+/-- An element of a product of monoids with zero whose coordinates are non-zero-divisors is a
+non-zero-divisor. -/
+lemma Pi.mem_nonZeroDivisors (hx : ∀ i, x i ∈ nonZeroDivisors (M₀ i)) :
+    x ∈ nonZeroDivisors (∀ i, M₀ i) :=
+  ⟨fun _ h ↦ funext fun i ↦ (hx i).1 _ (congrFun h i),
+    fun _ h ↦ funext fun i ↦ (hx i).2 _ (congrFun h i)⟩
+
+end Pi
 
 section CommMonoidWithZero
 variable {M₀ : Type*} [CommMonoidWithZero M₀] {a b r x : M₀}
