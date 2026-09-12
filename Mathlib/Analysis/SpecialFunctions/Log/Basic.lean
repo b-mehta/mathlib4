@@ -575,6 +575,11 @@ theorem tendsto_log_comp_add_sub_log (y : ℝ) :
 theorem tendsto_log_nat_add_one_sub_log : Tendsto (fun k : ℕ => log (k + 1) - log k) atTop (𝓝 0) :=
   (tendsto_log_comp_add_sub_log 1).comp tendsto_natCast_atTop_atTop
 
+/-- The function `n ↦ c / log n` tends to `0` as `n : ℕ` tends to infinity. -/
+theorem tendsto_const_div_log_natCast_atTop (c : ℝ) :
+    Tendsto (fun n : ℕ ↦ c / log n) atTop (𝓝 0) :=
+  tendsto_const_nhds.div_atTop (tendsto_log_atTop.comp tendsto_natCast_atTop_atTop)
+
 end Real
 
 end TendstoCompAddSub
